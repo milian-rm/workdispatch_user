@@ -10,7 +10,7 @@ const workerPortfolioSchema = Schema({
     },
     imageUrl: {
         type: String,
-        required: [true, 'La imagen del trabajo es obligatoria']
+        default: 'Imagen no disponible'
     },
     description: {
         type: String,

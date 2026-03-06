@@ -14,7 +14,7 @@ import { errorHandler } from '../middlewares/handle-errors.js';
 
 // Importaciones de Rutas
 const BASE_URL = '/workDispatch/v1';
-
+import WorkerPortFolioRoutes from '../src/WorkerPortFolio/WorkerPortFolio.routes.js';
 
 
 const middleware = (app) => {
@@ -27,9 +27,7 @@ const middleware = (app) => {
 }
 
 const routes = (app) => {
-
-
-
+    app.use(`${BASE_URL}/PortFolio`, WorkerPortFolioRoutes);
 }
 
 const initServer = async () => {

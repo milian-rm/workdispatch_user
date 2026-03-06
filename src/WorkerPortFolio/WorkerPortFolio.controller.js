@@ -79,20 +79,25 @@ export const updateRecord = async (req, res) => {
     }
 };
 
-// WORKER: Borrar registro (Soft Delete)
-export const deleteRecord = async (req, res) => {
+// WORKER: Cambiar estado del registro (Activar/Desactivar)
+export const changeStatus = async (req, res) => {
     try {
         const { id } = req.params;
         const record = await WorkerPortfolio.findById(id);
 
         if (!record) return res.status(404).send({ success: false, message: 'Registro no encontrado' });
 
-        record.status = 'INACTIVE';
-        record.deletedAt = new Date();
+        record.status = record.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+        record.deletedAt = record.status === 'INACTIVE' ? new Date() : null;
+
         await record.save();
 
-        return res.send({ success: true, message: 'Registro eliminado (Soft Delete)' });
+        return res.send({ 
+            success: true, 
+            message: `Registro marcado como ${record.status}`, 
+            record 
+        });
     } catch (err) {
-        return res.status(500).send({ success: false, message: 'Error al eliminar' });
+        return res.status(500).send({ success: false, message: 'Error al cambiar el estado' });
     }
 };

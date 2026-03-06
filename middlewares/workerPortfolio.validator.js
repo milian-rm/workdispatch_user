@@ -8,10 +8,6 @@ export const validateWorkerPortfolio = [
         .notEmpty().withMessage('El ID del trabajador es requerido')
         .isMongoId().withMessage('El ID del trabajador no es un formato válido de MongoDB'),
 
-    body('imageUrl')
-        .notEmpty().withMessage('La URL de la imagen es requerida')
-        .isURL().withMessage('Debe ser una URL válida para la imagen'),
-
     body('description')
         .trim()
         .notEmpty().withMessage('La descripción del trabajo es requerida')
