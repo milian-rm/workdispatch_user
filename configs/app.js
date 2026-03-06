@@ -15,7 +15,7 @@ import { errorHandler } from '../middlewares/handle-errors.js';
 // Importaciones de Rutas
 const BASE_URL = '/workDispatch/v1';
 import WorkerPortFolioRoutes from '../src/WorkerPortFolio/WorkerPortFolio.routes.js';
-
+import ProposalRoutes from '../src/Proposal/Proposal.routes.js';
 
 const middleware = (app) => {
     app.use(helmet(helmetConfiguration));
@@ -28,6 +28,7 @@ const middleware = (app) => {
 
 const routes = (app) => {
     app.use(`${BASE_URL}/PortFolio`, WorkerPortFolioRoutes);
+    app.use(`${BASE_URL}/Proposal`, ProposalRoutes);
 }
 
 const initServer = async () => {

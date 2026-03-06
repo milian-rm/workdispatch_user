@@ -18,12 +18,12 @@ import {
 const api = Router();
 
 // Acciones del WORKER
-api.post('/create', [validateProposal], createProposal);
-api.put('/update/:id', [validateProposalId, validateProposal], updateProposal);
+api.post('/', [validateProposal], createProposal);
+api.put('/:id', [validateProposalId, validateProposal], updateProposal);
 api.patch('/cancel/:id', [validateProposalId], cancelProposal);
 
 // Acciones del CLIENT
-api.get('/service-request/:serviceRequestId', [validateServiceRequestId], getProposalsByServiceRequest);
+api.get('/requests/:serviceRequestId', [validateServiceRequestId], getProposalsByServiceRequest);
 api.patch('/accept/:id', [validateProposalId], acceptProposal);
 api.patch('/reject/:id', [validateProposalId], rejectProposal);
 
