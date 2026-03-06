@@ -9,17 +9,22 @@ import {
     acceptProposal, 
     rejectProposal 
 } from './Proposal.controller.js';
+import { 
+    validateProposal, 
+    validateProposalId, 
+    validateServiceRequestId 
+} from '../../middlewares/proposal.validator.js';
 
 const api = Router();
 
-// Acciones que el documento asigna al WORKER 
-api.post('/', createProposal);
-api.put('/:id', updateProposal);
-api.patch('/:id', cancelProposal);
+// Acciones del WORKER
+api.post('/create', [validateProposal], createProposal);
+api.put('/update/:id', [validateProposalId, validateProposal], updateProposal);
+api.patch('/cancel/:id', [validateProposalId], cancelProposal);
 
-// Acción que el documento asigna al CLIENT
-api.get('/requests/:serviceRequestId', getProposalsByServiceRequest);
-api.patch('/accept/:id', acceptProposal);
-api.patch('/reject/:id', rejectProposal);
+// Acciones del CLIENT
+api.get('/service-request/:serviceRequestId', [validateServiceRequestId], getProposalsByServiceRequest);
+api.patch('/accept/:id', [validateProposalId], acceptProposal);
+api.patch('/reject/:id', [validateProposalId], rejectProposal);
 
 export default api;
