@@ -1,4 +1,3 @@
-
 import { Router } from 'express';
 import { 
     addUserSkill, 
@@ -7,15 +6,15 @@ import {
     getWorkerSkills 
 } from './userSkill.controller.js';
 import { validateJWT } from '../../middlewares/validate-jwt.js';
-
+// Imports de validadores
+import { validateAddUserSkill, validateUserSkillId } from '../../middlewares/userSkill-validator.js';
 const router = Router();
 
 // WORKER: Gestionar sus propias habilidades
-router.post('/', [validateJWT], addUserSkill);
-router.put('/:id', [validateJWT], updateUserSkill);
+router.post('/', [validateJWT, validateAddUserSkill], addUserSkill);
+router.put('/:id', [validateJWT, validateUserSkillId, validateAddUserSkill], updateUserSkill);
 router.get('/my-skills', [validateJWT], getMySkills);
 
 // CLIENT: Ver habilidades de un trabajador específico por su ID
 router.get('/worker/:userId', [validateJWT], getWorkerSkills);
-
 export default router;
