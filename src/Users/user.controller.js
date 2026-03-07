@@ -7,12 +7,8 @@ export const register = async (req, res) => {
     try {
         const data = req.body;
 
-        if (req.file){
-            const extension = req.file.path.split('.').pop();
-            const filename = req.file.filename;
-            const relativePath = filename.substring(filename.indexOf('users/'));
-
-            data.profilePhoto = `${relativePath}.${extension}`;
+        if (req.file) {
+            data.profilePhoto = req.file.path;
         } else {
             data.profilePhoto = `users/default-profile.png`;
         }
@@ -117,20 +113,27 @@ export const updateProfile = async (req, res) => {
         const { id } = req.params;
         const updates = req.body;
 
-        if (req.file){
+        if (req.file) {
             const currentUser = await User.findById(id);
 
             if (currentUser && currentUser.profilePhoto) {
-                const photoPath = currentUser.profilePhoto;
-                const photoWithoutExt = photoPath.substring(0, photoPath.lastIndexOf('.'));
-            };
-            const publicId = `workDispatch/${photoWithoutExt}`;
+                try {
+                    const photoPath = currentUser.profilePhoto;
 
-            try {
-                await cloudinary.uploader.destroy(publicId);
-            } catch (deleteError) {
-                console.error('Error al eliminar imagen anterior:', deleteError);
+                    const urlParts = photoPath.split('/');
+                    const fileWithExtension = urlParts[urlParts.length - 1];
+                    const folder = urlParts[urlParts.length - 2];
+
+                    const fileName = fileWithExtension.substring(0, fileWithExtension.lastIndexOf('.'));
+                    const publicId = `${folder}/${fileName}`;
+
+                    await cloudinary.uploader.destroy(publicId);
+                } catch (deleteError) {
+                    console.error('Error al eliminar imagen anterior:', deleteError);
+                }
             }
+
+            data.profilePhoto = req.file.path;
         }
 
         const userExist = await User.findById(id);
