@@ -1,8 +1,8 @@
 'use strict';
 
 import Proposal from './Proposal.model.js';
-// Importaremos el modelo Service más adelante para la creación automática
-// import Service from '../service/service.model.js'; 
+import Service from '../Service/Service.model.js';
+import { createServiceFromProposal } from '../Service/Service.controller.js';
 
 // WORKER: Crear Propuesta
 export const createProposal = async (req, res) => {
@@ -51,18 +51,35 @@ export const getProposalsByServiceRequest = async (req, res) => {
     }
 };
 
-// CLIENT: Aceptar Propuesta (¡Aquí va la lógica de creación de Servicio!)
+// CLIENT: Aceptar Propuesta 
 export const acceptProposal = async (req, res) => {
     try {
         const { id } = req.params;
+        const { clientId } = req.body; // Recibimos el ID del cliente desde el JSON
+
+        if (!clientId) {
+            return res.status(400).send({ success: false, message: 'El ID del cliente es obligatorio en el body' });
+        }
+
+        // Buscamos y actualizamos la propuesta
         const proposal = await Proposal.findByIdAndUpdate(id, { status: 'ACCEPTED' }, { new: true });
-        
+
         if (!proposal) return res.status(404).send({ success: false, message: 'Propuesta no encontrada' });
 
-        // AQUÍ ES DONDE LLAMAREMOS AL MÉTODO PARA CREAR EL SERVICIO AUTOMÁTICO
-        // await createServiceFromProposal(proposal); 
-        
-        return res.send({ success: true, message: 'Propuesta aceptada. Servicio creado.', proposal });
+        // Ahora usamos el clientId que viene del body
+        const newService = await createServiceFromProposal({
+            requestId: proposal.serviceRequestId,
+            clientId: clientId,
+            workerId: proposal.workerId,
+            price: proposal.price
+        });
+
+        return res.send({
+            success: true,
+            message: 'Propuesta aceptada y servicio creado.',
+            proposal,
+            serviceId: newService._id // Usamos la variable que capturamos arriba
+        });
     } catch (err) {
         return res.status(500).send({ success: false, message: 'Error al aceptar propuesta', err: err.message });
     }
