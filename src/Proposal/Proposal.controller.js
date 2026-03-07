@@ -55,7 +55,7 @@ export const getProposalsByServiceRequest = async (req, res) => {
 export const acceptProposal = async (req, res) => {
     try {
         const { id } = req.params;
-        const { clientId } = req.body; // Recibimos el ID del cliente desde el JSON
+        const { clientId } = req.body;
 
         if (!clientId) {
             return res.status(400).send({ success: false, message: 'El ID del cliente es obligatorio en el body' });
@@ -63,10 +63,17 @@ export const acceptProposal = async (req, res) => {
 
         // Buscamos y actualizamos la propuesta
         const proposal = await Proposal.findByIdAndUpdate(id, { status: 'ACCEPTED' }, { new: true });
+        // Rechaza automaticamente todas las demas propuestas de la misma solicitud sin afectar a la aceptada
+        await Proposal.updateMany(
+            { 
+                serviceRequestId: proposal.serviceRequestId, 
+                _id: { $ne: id } 
+            },
+            { status: 'REJECTED' } 
+        );
 
         if (!proposal) return res.status(404).send({ success: false, message: 'Propuesta no encontrada' });
 
-        // Ahora usamos el clientId que viene del body
         const newService = await createServiceFromProposal({
             requestId: proposal.serviceRequestId,
             clientId: clientId,
@@ -78,7 +85,7 @@ export const acceptProposal = async (req, res) => {
             success: true,
             message: 'Propuesta aceptada y servicio creado.',
             proposal,
-            serviceId: newService._id // Usamos la variable que capturamos arriba
+            serviceId: newService._id
         });
     } catch (err) {
         return res.status(500).send({ success: false, message: 'Error al aceptar propuesta', err: err.message });

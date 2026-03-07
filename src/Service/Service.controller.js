@@ -4,7 +4,6 @@ import Service from './Service.model.js';
 
 /**
  * MÉTODO AUTOMÁTICO: Crear un servicio (Llamado desde proposal.controller.js)
- * No es un endpoint (no recibe req, res), es una función de servicio interno.
  */
 export const createServiceFromProposal = async (serviceData) => {
     try {
@@ -13,7 +12,7 @@ export const createServiceFromProposal = async (serviceData) => {
             clientId: serviceData.clientId,
             workerId: serviceData.workerId,
             finalPrice: serviceData.price,
-            status: 'IN_PROGRESS', // El servicio inicia al aceptarse la propuesta
+            status: 'IN_PROGRESS',
             startDate: new Date()
         });
         return await newService.save();
