@@ -27,7 +27,11 @@ const reviewSchema = new Schema({
     Comment: {
         type: String,
         required: [true, 'El comentario es obligatorio']
-    }
+    },
+    Status: {
+        type: Boolean,
+        default: true 
+    }    
 }, {
     timestamps: true,
     versionKey: false 
