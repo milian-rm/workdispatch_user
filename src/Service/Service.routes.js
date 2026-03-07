@@ -2,7 +2,7 @@
 
 import { Router } from 'express';
 import { getServiceStatus, finishService } from './Service.controller.js';
-import { validateServiceId } from './service.validator.js';
+import { validateServiceId } from '../../middlewares/service.validator.js';
 
 const api = Router();
 
