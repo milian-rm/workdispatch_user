@@ -66,13 +66,10 @@ const createCloudinaryUploader = (folder) => {
 
 // ----------------------------------------------------------------------------------------------------------
 // Aqui van los metodos para la actualización de imagenes, se pueden crear mas metodos para otras carpetas
-export const uploadProductImage = createCloudinaryUploader(
-    process.env.CLOUDINARY_FOLDER || 'restaurantSystem/products'
+export const uploadworkerPortfolioImage = createCloudinaryUploader(
+    process.env.CLOUDINARY_FOLDER || 'WorkDispatch/workerPortfolio'
 );
 
-export const uploadBranchImage = createCloudinaryUploader(
-    process.env.CLOUDINARY_FOLDER || 'restaurantSystem/branches'
-);
 // ----------------------------------------------------------------------------------------------------------
 
 // Export cloudinary instance para usar en delete-file-on-error

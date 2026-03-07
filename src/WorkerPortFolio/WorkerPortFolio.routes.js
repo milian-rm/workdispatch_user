@@ -13,10 +13,13 @@ import {
     validatePortfolioId, 
     validateWorkerIdParam 
 } from '../../middlewares/workerPortfolio.validator.js';
+import { uploadworkerPortfolioImage } from '../../middlewares/file-uploader.js';
+import { cleanupUploadedFileOnFinish } from '../../middlewares/delete-file-on-error.js';
+
 const api = Router();
 
 // Acciones de WORKER 
-api.post('/', [validateWorkerPortfolio], addRecord);
+api.post('/', [uploadworkerPortfolioImage.single('image'), cleanupUploadedFileOnFinish],  [validateWorkerPortfolio], addRecord);
 api.get('/my/:workerId', [validateWorkerIdParam],  getMyPortfolio);
 api.put('/:id', [validatePortfolioId, validateWorkerPortfolio], updateRecord);
 api.patch('/status/:id', [validatePortfolioId], changeStatus);

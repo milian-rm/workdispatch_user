@@ -6,12 +6,26 @@ import WorkerPortfolio from './WorkerPortFolio.model.js';
 export const addRecord = async (req, res) => {
     try {
         const data = req.body; 
-        const record = new WorkerPortfolio(data);
+
+        // Verrificar si cloudinary subio la imagen
+        if (!req.file) {
+            return res.status(400).send({ 
+                success: false, 
+                message: 'La imagen del trabajo es obligatoria' 
+            });
+        }
+
+        
+        const record = new WorkerPortfolio({
+            ...data,
+            imageUrl: req.file.path // Aquí llega la URL de Cloudinary
+        });
+
         await record.save();
         
         return res.status(201).send({ 
             success: true, 
-            message: 'Registro añadido al portafolio', 
+            message: 'Registro añadido al portafolio con imagen exitosamente', 
             record 
         });
     } catch (err) {
