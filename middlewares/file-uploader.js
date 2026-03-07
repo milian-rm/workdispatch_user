@@ -15,7 +15,7 @@ cloudinary.config({
 });
 
 const MIMETYPES = [
-    'image/jpeg',
+    'image/jpeg',   
     'image/png',
     'image/jpg',
     'image/webp',
@@ -66,12 +66,8 @@ const createCloudinaryUploader = (folder) => {
 
 // ----------------------------------------------------------------------------------------------------------
 // Aqui van los metodos para la actualización de imagenes, se pueden crear mas metodos para otras carpetas
-export const uploadProductImage = createCloudinaryUploader(
-    process.env.CLOUDINARY_FOLDER || 'restaurantSystem/products'
-);
-
-export const uploadBranchImage = createCloudinaryUploader(
-    process.env.CLOUDINARY_FOLDER || 'restaurantSystem/branches'
+export const uploadUserProfileImage = createCloudinaryUploader(
+    process.env.CLOUDINARY_FOLDER || 'workDispatch/users'
 );
 // ----------------------------------------------------------------------------------------------------------
 
