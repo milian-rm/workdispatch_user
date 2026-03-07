@@ -1,28 +1,27 @@
-
 import { body, param } from 'express-validator';
 import { checkValidators } from './check-validators.js';
 
 export const validateCreateServiceRequest = [
-    body('Title')
+    body('title') 
         .notEmpty().withMessage('El título es obligatorio')
         .isLength({ min: 10 }).withMessage('El título debe tener al menos 10 caracteres'),
     
-    body('Description')
+    body('description') 
         .notEmpty().withMessage('La descripción es obligatoria'),
     
     body('categoryId')
         .notEmpty().withMessage('La categoría es obligatoria')
         .isMongoId().withMessage('El ID de la categoría debe ser un formato válido de MongoDB'),
     
-    body('Latitude')
+    body('latitude') 
         .notEmpty().withMessage('La latitud es obligatoria')
         .isFloat({ min: -90, max: 90 }).withMessage('La latitud debe estar entre -90 y 90'),
     
-    body('Longitude')
+    body('longitude') 
         .notEmpty().withMessage('La longitud es obligatoria')
         .isFloat({ min: -180, max: 180 }).withMessage('La longitud debe estar entre -180 y 180'),
     
-    body('Address')
+    body('address') 
         .notEmpty().withMessage('La dirección es obligatoria'),
     
     body('budgetMin')

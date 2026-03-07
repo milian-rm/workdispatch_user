@@ -26,6 +26,14 @@ const serviceRequestSchema = new mongoose.Schema({
         type: String,
         required: [true, 'La dirección es obligatoria']
     },
+    latitude: {
+        type: Number,
+        required: [true, 'La latitud es obligatoria para la ubicación']
+    },
+    longitude: {
+        type: Number,
+        required: [true, 'La longitud es obligatoria para la ubicación']
+    },
     budgetMin: {
         type: Number,
         required: true
