@@ -6,6 +6,9 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import helmet from 'helmet';
+import skillRoutes from '../src/Skill/skill.routes.js';
+import serviceRequestRoutes from '../src/ServiceRequest/serviceRequest.routes.js';
+import userSkillRoutes from '../src/UserSkill/userSkill.routes.js';
 import { corsOptions } from './cors-configuration.js';
 import { dbConnection } from './db.js';
 import { helmetConfiguration } from './helmet-configuration.js';
@@ -27,7 +30,9 @@ const middleware = (app) => {
 }
 
 const routes = (app) => {
-
+app.use(`${BASE_URL}/skill`, skillRoutes);
+    app.use(`${BASE_URL}/serviceRequest`, serviceRequestRoutes);
+    app.use(`${BASE_URL}/userSkill`, userSkillRoutes);
 
 
 }
