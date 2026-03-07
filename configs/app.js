@@ -15,7 +15,7 @@ import { errorHandler } from '../middlewares/handle-errors.js';
 // Importaciones de Rutas
 const BASE_URL = '/workDispatch/v1';
 import reviewRoutes from '../src/Review/review.routes.js';
-
+import notificationRoutes from '../src/Notification/notification.routes.js';
 
 const middleware = (app) => {
     app.use(helmet(helmetConfiguration));
@@ -28,7 +28,7 @@ const middleware = (app) => {
 
 const routes = (app) => {
 app.use(`${BASE_URL}/reviews`, reviewRoutes);
-
+app.use(`${BASE_URL}/notifications`, notificationRoutes);
 
 }
 
