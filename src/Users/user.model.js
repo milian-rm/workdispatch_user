@@ -69,6 +69,6 @@ const userSchema = Schema({
         type: Boolean,
         default: true
     }
-}, { versionKey: false });
+});
 
 export default model('User', userSchema);
