@@ -50,11 +50,14 @@ export const cancelServiceRequest = async (req, res) => {
     }
 };
 
-// WORKER: Ver solicitudes abiertas y Filtrar por categoría 
+// WORKER: Ver solicitudes abiertas (Solo las que están activas)
 export const getOpenRequests = async (req, res) => {
     try {
         const { categoryId } = req.query;
-        const filter = { status: 'OPEN' };
+        
+        // Agregamos isActive: true al filtro
+        const filter = { status: 'OPEN', isActive: true }; 
+        
         if (categoryId) filter.categoryId = categoryId;
 
         const requests = await ServiceRequest.find(filter)
