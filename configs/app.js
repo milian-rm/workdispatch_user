@@ -20,7 +20,8 @@ const BASE_URL = '/workDispatch/v1';
 import reviewRoutes from '../src/Review/review.routes.js';
 import notificationRoutes from '../src/Notification/notification.routes.js';
 import reportRoutes from '../src/Report/report.routes.js';
-
+import userRoutes from '../src/Users/user.routes.js';
+import verificationRoutes from '../src/Verifications/verification.routes.js';
 
 import WorkerPortFolioRoutes from '../src/WorkerPortFolio/WorkerPortFolio.routes.js';
 import ProposalRoutes from '../src/Proposal/Proposal.routes.js';
@@ -44,11 +45,11 @@ app.use(`${BASE_URL}/reports`, reportRoutes);
     app.use(`${BASE_URL}/Proposal`, ProposalRoutes);
     app.use(`${BASE_URL}/Service`, ServiceRoutes);
 
-app.use(`${BASE_URL}/skill`, skillRoutes);
+    app.use(`${BASE_URL}/skill`, skillRoutes);
     app.use(`${BASE_URL}/serviceRequest`, serviceRequestRoutes);
     app.use(`${BASE_URL}/userSkill`, userSkillRoutes);
-
-
+    app.use(`${BASE_URL}/users`, userRoutes); // <-- ¡En singular!
+    app.use(`${BASE_URL}/verifications`, verificationRoutes);
 }
 
 const initServer = async () => {

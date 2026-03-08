@@ -1,6 +1,7 @@
 'use strict';
 
 import ServiceRequest from './serviceRequest.model.js';
+import { createAutomaticNotification } from '../helpers/notification.helper.js';
 
 // CLIENT: Crear solicitud 
 export const createServiceRequest = async (req, res) => {

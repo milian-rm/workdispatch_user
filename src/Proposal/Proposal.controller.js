@@ -2,7 +2,9 @@
 
 import Proposal from './Proposal.model.js';
 import Service from '../Service/Service.model.js';
+import ServiceRequest from '../ServiceRequest/serviceRequest.model.js';
 import { createServiceFromProposal } from '../Service/Service.controller.js';
+import { createAutomaticNotification } from '../helpers/notification.helper.js';
 
 // WORKER: Crear Propuesta
 export const createProposal = async (req, res) => {
@@ -34,6 +36,15 @@ export const createProposal = async (req, res) => {
 
         const proposal = new Proposal(req.body);
         await proposal.save();
+
+        const request = await ServiceRequest.findById(serviceRequestId);
+        if (request) {
+            await createAutomaticNotification(
+                request.clientId,
+                '¡Tienes una nueva propuesta para tu solicitud de servicio!',
+                'NEW_PROPOSAL'
+            );
+        }
 
         return res.status(201).send({ success: true, message: 'Propuesta enviada', proposal });
     } catch (err) {
@@ -105,6 +116,12 @@ export const acceptProposal = async (req, res) => {
             workerId: proposal.workerId,
             price: proposal.price
         });
+
+        await createAutomaticNotification(
+            proposal.workerId,
+            '¡Buenas noticias! Tu propuesta ha sido aceptada y el servicio ha sido creado.',
+            'PROPOSAL_ACCEPTED'
+        );
 
         return res.send({
             success: true,

@@ -1,10 +1,17 @@
 import Report from './report.model.js';
+import { createAutomaticNotification } from '../helpers/notification.helper.js';
 
 export const createReport = async (req, res) => {
     try {
         const data = req.body;
         const report = new Report(data);
         await report.save();
+
+        await createAutomaticNotification(
+            data.reporteredId, // Al que están reportando
+            'Atención: Tu cuenta ha recibido un reporte por incumplimiento o mala conducta.', 
+            'ACCOUNT_REPORTED'
+        );
 
         res.status(201).json({
             success: true,
