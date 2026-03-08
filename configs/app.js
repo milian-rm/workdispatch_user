@@ -19,6 +19,9 @@ import notificationRoutes from '../src/Notification/notification.routes.js';
 import reportRoutes from '../src/Report/report.routes.js';
 
 
+import WorkerPortFolioRoutes from '../src/WorkerPortFolio/WorkerPortFolio.routes.js';
+import ProposalRoutes from '../src/Proposal/Proposal.routes.js';
+import ServiceRoutes from '../src/Service/Service.routes.js';
 
 const middleware = (app) => {
     app.use(helmet(helmetConfiguration));
@@ -33,7 +36,11 @@ const routes = (app) => {
 app.use(`${BASE_URL}/reviews`, reviewRoutes);
 app.use(`${BASE_URL}/notifications`, notificationRoutes);
 app.use(`${BASE_URL}/reports`, reportRoutes);
-}
+
+    app.use(`${BASE_URL}/PortFolio`, WorkerPortFolioRoutes);
+    app.use(`${BASE_URL}/Proposal`, ProposalRoutes);
+    app.use(`${BASE_URL}/Service`, ServiceRoutes);
+}   
 
 const initServer = async () => {
     const app = express();

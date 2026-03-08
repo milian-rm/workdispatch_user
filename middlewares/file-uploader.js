@@ -73,6 +73,10 @@ export const uploadUserProfileImage = createCloudinaryUploader(
 export const uploadVerificationImage = createCloudinaryUploader(
     process.env.CLOUDINARY_FOLDER || 'workDispatch/verifications'
 );
+export const uploadworkerPortfolioImage = createCloudinaryUploader(
+    process.env.CLOUDINARY_FOLDER || 'WorkDispatch/workerPortfolio'
+);
+
 // ----------------------------------------------------------------------------------------------------------
 
 // Export cloudinary instance para usar en delete-file-on-error
