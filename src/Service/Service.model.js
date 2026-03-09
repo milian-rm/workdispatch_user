@@ -5,17 +5,17 @@ import { Schema, model } from 'mongoose';
 const serviceSchema = Schema({
     requestId: {
         type: Schema.Types.ObjectId,
-        ref: 'ServiceRequest', 
+        ref: 'ServiceRequest',
         required: [true, 'El ID de la solicitud es obligatorio']
     },
     clientId: {
         type: Schema.Types.ObjectId,
-        ref: 'User', 
+        ref: 'User',
         required: [true, 'El ID del cliente es obligatorio']
     },
     workerId: {
         type: Schema.Types.ObjectId,
-        ref: 'User', 
+        ref: 'User',
         required: [true, 'El ID del trabajador es obligatorio']
     },
     finalPrice: {
@@ -34,6 +34,7 @@ const serviceSchema = Schema({
     },
     cancelledBy: {
         type: String,
+        enum: ['CLIENT', 'WORKER'],
         default: null
     },
     startDate: {
