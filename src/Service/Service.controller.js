@@ -1,6 +1,7 @@
 'use strict';
 
 import Service from './Service.model.js';
+import { createAutomaticNotification } from '../helpers/notification.helper.js';
 
 /**
  * MÉTODO AUTOMÁTICO: Crear un servicio (Llamado desde proposal.controller.js)
@@ -47,6 +48,13 @@ export const finishService = async (req, res) => {
         
         if (!service) return res.status(404).send({ success: false, message: 'Servicio no encontrado' });
         
+        await createAutomaticNotification(
+            service.clientId,
+            'Tu servicio ha sido marcado como terminado por el trabajador.',
+            'SERVICE_COMPLETED'
+        );
+
+
         return res.send({ success: true, message: 'Trabajo marcado como terminado exitosamente', service });
     } catch (err) {
         return res.status(500).send({ success: false, message: 'Error al finalizar el servicio', err: err.message });
@@ -84,6 +92,14 @@ export const cancelService = async (req, res) => {
         service.endDate = new Date();
 
         await service.save();
+
+        const notifyUserId = role === 'CLIENT' ? service.workerId : service.clientId;
+        
+        await createAutomaticNotification(
+            notifyUserId,
+            `El servicio ha sido cancelado por el ${role}. Razón: ${cancelReason}`,
+            'SERVICE_CANCELLED'
+        );
 
         return res.send({ success: true, message: 'Servicio cancelado exitosamente', service });
     } catch (err) {

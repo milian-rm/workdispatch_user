@@ -1,10 +1,17 @@
 import Review from './review.model.js';
+import { createAutomaticNotification } from '../helpers/notification.helper.js';
 
 export const createReview = async (req, res) => {
     try {
         const data = req.body;
         const review = new Review(data);
         await review.save();
+
+        await createAutomaticNotification(
+            data.revieweredId, // Al trabajador que evaluaron
+            `Has recibido una nueva reseña de ${data.Rating} estrellas.`, 
+            'NEW_REVIEW'
+        );
 
         res.status(201).json({
             success: true,
