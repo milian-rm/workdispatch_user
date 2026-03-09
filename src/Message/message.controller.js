@@ -1,46 +1,75 @@
 import Message from './message.model.js';
 import Conversation from '../Conversation/conversation.model.js';
+import { createAutomaticNotification } from '../helpers/notification.helper.js';
 
 export const sendMessage = async (req, res) => {
     try {
 
-        const { conversationId, senderId, content } = req.body;
+        const { conversationId, content, senderId } = req.body;
 
         const conversation = await Conversation.findById(conversationId);
 
         if (!conversation) {
-            return res.status(404).json({
+            return res.status(404).send({
                 success: false,
                 message: 'Conversación no encontrada'
             });
         }
 
-        const message = new Message({
+        // Validar que el sender pertenece a la conversación
+        if (
+            senderId !== conversation.user1Id.toString() &&
+            senderId !== conversation.user2Id.toString()
+        ) {
+            return res.status(403).send({
+                success: false,
+                message: 'El usuario no pertenece a esta conversación'
+            });
+        }
+
+        // Crear mensaje
+        const newMessage = new Message({
             conversationId,
             senderId,
             content
         });
 
-        await message.save();
+        await newMessage.save();
 
+        // Determinar receptor
+        const receiverId =
+            senderId === conversation.user1Id.toString()
+                ? conversation.user2Id
+                : conversation.user1Id;
+
+        // Actualizar último mensaje de la conversación
         conversation.lastMessage = content;
         conversation.lastMessageAt = new Date();
+
         await conversation.save();
 
-        res.status(201).json({
+        // Crear notificación automática
+        await createAutomaticNotification(
+            receiverId,
+            'Tienes un nuevo mensaje.',
+            'NEW_MESSAGE'
+        );
+
+        return res.send({
             success: true,
-            message: 'Mensaje enviado correctamente',
-            data: message
+            message: 'Mensaje enviado',
+            newMessage
         });
 
-    } catch (error) {
-        res.status(500).json({
+    } catch (err) {
+        return res.status(500).send({
             success: false,
             message: 'Error al enviar mensaje',
-            error: error.message
+            err: err.message
         });
     }
 };
+
 
 export const getMessagesByConversation = async (req, res) => {
     try {

@@ -19,9 +19,9 @@ const messageSchema = Schema({
         type: Boolean,
         default: false
     },
-    deletedAt: {
-        type: Date,
-        default: null
+    status: {
+        type: Boolean,
+        default: true
     },
     createdAt: {
         type: Date,

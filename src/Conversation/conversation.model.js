@@ -19,9 +19,9 @@ const conversationSchema = Schema({
         type: Date,
         default: null
     },
-    deletedAt: {
-        type: Date,
-        default: null
+    status: {
+        type: Boolean,
+        default: true
     },
     createdAt: {
         type: Date,

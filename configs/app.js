@@ -19,17 +19,15 @@ import notificationRoutes from '../src/Notification/notification.routes.js';
 import reportRoutes from '../src/Report/report.routes.js';
 import userRoutes from '../src/Users/user.routes.js';
 import verificationRoutes from '../src/Verifications/verification.routes.js';
-<<<<<<< HEAD
 import categoryRoutes from '../src/Categories/category.routes.js';
-=======
-
->>>>>>> ft/KevinVelasquez
 import WorkerPortFolioRoutes from '../src/WorkerPortFolio/WorkerPortFolio.routes.js';
 import ProposalRoutes from '../src/Proposal/Proposal.routes.js';
 import ServiceRoutes from '../src/Service/Service.routes.js';
 import SkillRoutes from '../src/Skill/skill.routes.js';
 import ServiceRequestRoutes from '../src/ServiceRequest/serviceRequest.routes.js';
 import UserSkillRoutes from '../src/UserSkill/userSkill.routes.js';
+import conversationRoutes from '../src/Conversation/conversation.routes.js'
+import messageRoutes from '../src/Message/message.routes.js';
 
 const middleware = (app) => {
     app.use(helmet(helmetConfiguration));
@@ -53,19 +51,13 @@ const routes = (app) => {
     app.use(`${BASE_URL}/Proposal`, ProposalRoutes);
     app.use(`${BASE_URL}/Service`, ServiceRoutes);
 
-<<<<<<< HEAD
     app.use(`${BASE_URL}/skill`, SkillRoutes);
     app.use(`${BASE_URL}/serviceRequest`, ServiceRequestRoutes);
     app.use(`${BASE_URL}/userSkill`, UserSkillRoutes);
 
+    app.use(`${BASE_URL}/conversations`, conversationRoutes);
+    app.use(`${BASE_URL}/messages`, messageRoutes);    
 
-=======
-    app.use(`${BASE_URL}/skill`, skillRoutes);
-    app.use(`${BASE_URL}/serviceRequest`, serviceRequestRoutes);
-    app.use(`${BASE_URL}/userSkill`, userSkillRoutes);
-    app.use(`${BASE_URL}/users`, userRoutes); // <-- ¡En singular!
-    app.use(`${BASE_URL}/verifications`, verificationRoutes);
->>>>>>> ft/KevinVelasquez
 }
 
 const initServer = async () => {
