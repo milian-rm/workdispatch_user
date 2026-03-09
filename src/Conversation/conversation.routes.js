@@ -4,9 +4,14 @@ import {
     getUserConversations
 } from './conversation.controller.js';
 
+import {
+    validateCreateConversation,
+    validateGetUserConversations
+}from '../../middlewares/conversation-validator.js'
+
 const router = Router();
 
-router.post('/', createConversation);
-router.get('/user/:userId', getUserConversations);
+router.post('/', validateCreateConversation, createConversation);
+router.get('/user/:userId', validateGetUserConversations, getUserConversations);
 
 export default router;
