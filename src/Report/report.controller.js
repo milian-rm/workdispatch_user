@@ -9,7 +9,7 @@ export const createReport = async (req, res) => {
 
         await createAutomaticNotification(
             data.reporteredId, // Al que están reportando
-            'Atención: Tu cuenta ha recibido un reporte por incumplimiento o mala conducta.', 
+            'Atención: Se ha recibido un reporte por incumplimiento o mala conducta.', 
             'ACCOUNT_REPORTED'
         );
 
