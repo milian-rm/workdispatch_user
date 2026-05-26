@@ -3,6 +3,10 @@
 import { Schema, model } from 'mongoose';
 
 const serviceSchema = Schema({
+    serviceCode: {
+        type: String,
+        unique: true
+    },
     requestId: {
         type: Schema.Types.ObjectId,
         ref: 'ServiceRequest',
@@ -34,7 +38,7 @@ const serviceSchema = Schema({
     },
     cancelledBy: {
         type: String,
-        enum: ['CLIENT', 'WORKER'],
+        enum: ['CLIENT', 'WORKER', null],
         default: null
     },
     startDate: {
@@ -46,5 +50,13 @@ const serviceSchema = Schema({
         default: null
     }
 }, { versionKey: false, timestamps: true });
+
+// Genera SVC-001, SVC-002...
+serviceSchema.pre('save', async function () {
+    if (!this.serviceCode) {
+        const count = await this.constructor.countDocuments();
+        this.serviceCode = `SVC-${String(count + 1).padStart(3, '0')}`;
+    }
+});
 
 export default model('Service', serviceSchema);

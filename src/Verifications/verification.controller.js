@@ -1,5 +1,6 @@
 import Verification from './verification.model.js';
 import User from '../Users/user.model.js';
+import { createAdminNotification } from '../helpers/notification.helper.js';
 
 export const createVerification = async (req, res) => {
     try {
@@ -18,7 +19,6 @@ export const createVerification = async (req, res) => {
         }
 
         const existingVerification = await Verification.findOne({ userId: data.userId });
-
         if (existingVerification) {
             return res.status(400).json({
                 success: false,
@@ -28,6 +28,12 @@ export const createVerification = async (req, res) => {
 
         const verification = new Verification(data);
         await verification.save();
+
+        // Notificar al admin
+        await createAdminNotification(
+            'Un usuario ha enviado una nueva solicitud de verificación de identidad.',
+            'NEW_VERIFICATION'
+        );
 
         res.status(201).json({
             success: true,

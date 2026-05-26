@@ -91,30 +91,42 @@ export const getProposalsByServiceRequest = async (req, res) => {
 export const acceptProposal = async (req, res) => {
     try {
         const { id } = req.params;
-        const { clientId } = req.body;
 
-        if (!clientId) {
-            return res.status(400).send({ success: false, message: 'El ID del cliente es obligatorio en el body' });
+        // 1. Buscar la propuesta primero (antes de actualizar)
+        const proposal = await Proposal.findById(id);
+        if (!proposal) {
+            return res.status(404).send({ success: false, message: 'Propuesta no encontrada' });
+        }
+        if (proposal.status !== 'PENDING') {
+            return res.status(400).send({ success: false, message: 'Solo se pueden aceptar propuestas en estado PENDING' });
         }
 
-        // Buscamos y actualizamos la propuesta
-        const proposal = await Proposal.findByIdAndUpdate(id, { status: 'ACCEPTED' }, { new: true });
-        // Rechaza automaticamente todas las demas propuestas de la misma solicitud sin afectar a la aceptada
+        // 2. Obtener la ServiceRequest para extraer el clientId real
+        const serviceRequest = await ServiceRequest.findById(proposal.serviceRequestId);
+        if (!serviceRequest) {
+            return res.status(404).send({ success: false, message: 'Solicitud de servicio no encontrada' });
+        }
+
+        // 3. Aceptar la propuesta
+        proposal.status = 'ACCEPTED';
+        await proposal.save();
+
+        // 4. Rechazar las demás propuestas de la misma solicitud
         await Proposal.updateMany(
-            {
-                serviceRequestId: proposal.serviceRequestId,
-                _id: { $ne: id }
-            },
+            { serviceRequestId: proposal.serviceRequestId, _id: { $ne: id } },
             { status: 'REJECTED' }
         );
 
-        if (!proposal) return res.status(404).send({ success: false, message: 'Propuesta no encontrada' });
+        // 5. Actualizar el estado de la ServiceRequest
+        serviceRequest.status = 'IN_PROGRESS';
+        await serviceRequest.save();
 
+        // 6. Crear el Service usando el clientId de la ServiceRequest (no del body)
         const newService = await createServiceFromProposal({
             requestId: proposal.serviceRequestId,
-            clientId: clientId,
-            workerId: proposal.workerId,
-            price: proposal.price
+            clientId:  serviceRequest.clientId,   // <-- FIX: viene de la request, no del body
+            workerId:  proposal.workerId,
+            price:     proposal.price
         });
 
         await createAutomaticNotification(
