@@ -14,17 +14,22 @@ import {
     validateWorkerIdParam 
 } from '../../middlewares/workerPortfolio.validator.js';
 import { uploadworkerPortfolioImage } from '../../middlewares/file-uploader.js';
-import { cleanupUploadedFileOnFinish } from '../../middlewares/delete-file-on-error.js';
+import { cleanupUploadedFileOnFinish, deleteFileOnError } from '../../middlewares/delete-file-on-error.js';
 
 const api = Router();
 
-// Acciones de WORKER 
-api.post('/', [uploadworkerPortfolioImage.single('image'), cleanupUploadedFileOnFinish],  [validateWorkerPortfolio], addRecord);
-api.get('/my/:workerId', [validateWorkerIdParam],  getMyPortfolio);
-api.put('/:id', [validatePortfolioId, validateWorkerPortfolio], updateRecord);
-api.patch('/status/:id', [validatePortfolioId], changeStatus);
+api.post(
+    '/',
+    uploadworkerPortfolioImage.single('image'),
+    cleanupUploadedFileOnFinish,
+    validateWorkerPortfolio,
+    addRecord,
+    deleteFileOnError
+);
 
-// Acción de CLIENT
-api.get('/:id', [validatePortfolioId], getPortfolioByWorker);
+api.get('/my/:workerId', validateWorkerIdParam, getMyPortfolio);
+api.put('/:id', validatePortfolioId, validateWorkerPortfolio, updateRecord);
+api.patch('/status/:id', validatePortfolioId, changeStatus);
+api.get('/:id', validatePortfolioId, getPortfolioByWorker);
 
 export default api;
