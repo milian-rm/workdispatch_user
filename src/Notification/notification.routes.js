@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { getUserNotifications } from './notification.controller.js';
-import { getNotificationsValidator } from '../../middlewares/notification-validator.js';
+import { getUserNotifications, markAllAsRead, markAsRead } from './notification.controller.js';
+import { getNotificationsValidator,  } from '../../middlewares/notification-validator.js';
 
 const router = Router();
 
@@ -10,5 +10,7 @@ router.get(
     getNotificationsValidator, 
     getUserNotifications
 );
+router.patch('/:id/read', markAsRead);
+router.patch('/:userId/read-all', markAllAsRead);
 
 export default router;
