@@ -1,18 +1,21 @@
 'use strict';
 
 import { Router } from 'express';
-import { getServiceStatus, finishService, cancelService } from './Service.controller.js';
+import { getServiceStatus, getServicesByWorker, finishService, cancelService } from './Service.controller.js';
 import { validateServiceId } from '../../middlewares/service.validator.js';
 
 const api = Router();
 
-// Acción de CLIENT
+// WORKER: Ver servicios asignados.
+api.get('/worker/:workerId', getServicesByWorker);
+
+// CLIENT: Ver estado del servicio.
 api.get('/:id', [validateServiceId], getServiceStatus);
 
-// Acciones de WORKER 
+// WORKER: Marcar trabajo como terminado.
 api.patch('/complete/:id', [validateServiceId], finishService);
 
-// Accion para los 2
+// CLIENT / WORKER: Cancelar servicio.
 api.patch('/cancel/:id', [validateServiceId], cancelService);
 
 export default api;

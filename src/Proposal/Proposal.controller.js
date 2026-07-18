@@ -1,7 +1,7 @@
 'use strict';
 
+import mongoose from 'mongoose';
 import Proposal from './Proposal.model.js';
-import Service from '../Service/Service.model.js';
 import ServiceRequest from '../ServiceRequest/serviceRequest.model.js';
 import { createServiceFromProposal } from '../Service/Service.controller.js';
 import { createAutomaticNotification } from '../helpers/notification.helper.js';
@@ -73,6 +73,31 @@ export const cancelProposal = async (req, res) => {
         return res.send({ success: true, message: 'Propuesta cancelada', proposal });
     } catch (err) {
         return res.status(500).send({ success: false, message: 'Error al cancelar' });
+    }
+};
+
+export const getProposalsByWorker = async (req, res) => {
+    try {
+        const { workerId } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(workerId)) {
+            return res.send({ success: true, proposals: [] });
+        }
+
+        const proposals = await Proposal.find({ workerId, deletedAt: null })
+            .populate({
+                path: 'serviceRequestId',
+                select: 'title description address budgetMin budgetMax categoryId status createdAt',
+                populate: {
+                    path: 'categoryId',
+                    select: 'name'
+                }
+            })
+            .sort({ createdAt: -1 });
+
+        return res.send({ success: true, proposals });
+    } catch (err) {
+        return res.status(500).send({ success: false, message: 'Error al obtener propuestas del trabajador', err: err.message });
     }
 };
 

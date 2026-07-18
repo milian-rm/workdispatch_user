@@ -4,7 +4,6 @@ import { checkValidators } from './check.validators.js';
 const userRoles = ['CLIENT', 'WORKER', 'ADMIN'];
 
 export const validateCreateUser = [
-
     body('firstName')
         .notEmpty().withMessage('Nombre es obligatorio'),
 
@@ -13,17 +12,17 @@ export const validateCreateUser = [
 
     body('email')
         .notEmpty().withMessage('Email es requerido')
-        .isEmail().withMessage('Formato de email inválido'),
+        .isEmail().withMessage('Formato de email invalido'),
 
     body('password')
-        .notEmpty().withMessage('La contraseña es obligatoria'),
+        .notEmpty().withMessage('La contrasena es obligatoria'),
 
     body('phone')
         .optional(),
 
     body('role')
         .optional()
-        .isIn(userRoles).withMessage('Rol inválido'),
+        .isIn(userRoles).withMessage('Rol invalido'),
 
     body('profilePhoto')
         .optional(),
@@ -39,21 +38,20 @@ export const validateCreateUser = [
         .optional(),
 
     body('latitude')
-        .notEmpty().withMessage('Latitud es requerida'),
+        .optional(),
 
     body('longitude')
-        .notEmpty().withMessage('Longitud es requerida'),
+        .optional(),
 
     body('address')
-        .notEmpty().withMessage('Dirección es requerida'),
+        .optional(),
 
     checkValidators
 ];
 
 export const validateUpdateUser = [
-
     param('id')
-        .isMongoId().withMessage('ID User inválido'),
+        .isMongoId().withMessage('ID User invalido'),
 
     body('firstName')
         .optional(),
@@ -63,7 +61,7 @@ export const validateUpdateUser = [
 
     body('email')
         .optional()
-        .isEmail().withMessage('Formato de email inválido'),
+        .isEmail().withMessage('Formato de email invalido'),
 
     body('password')
         .optional(),
@@ -73,7 +71,7 @@ export const validateUpdateUser = [
 
     body('role')
         .optional()
-        .isIn(userRoles).withMessage('Rol inválido'),
+        .isIn(userRoles).withMessage('Rol invalido'),
 
     body('profilePhoto')
         .optional(),
@@ -102,15 +100,14 @@ export const validateUpdateUser = [
 
 export const validateUserIdParam = [
     param('id')
-        .isMongoId().withMessage('ID User inválido'),
+        .isMongoId().withMessage('ID User invalido'),
     checkValidators
 ];
 
 export const validateLoginUser = [
-
     body('email')
         .notEmpty().withMessage('Email es requerido')
-        .isEmail().withMessage('Formato de email inválido')
+        .isEmail().withMessage('Formato de email invalido')
         .normalizeEmail(),
 
     body('password')
