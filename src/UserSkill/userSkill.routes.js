@@ -12,7 +12,7 @@ const router = Router();
 // WORKER: Gestionar sus propias habilidades
 router.post('/', [validateAddUserSkill], addUserSkill);
 router.put('/:id', validateUserSkillId, updateUserSkill);
-router.get('/:id', getMySkills);
+router.get('/my/:userId', getMySkills);
 
 // CLIENT: Ver habilidades de un trabajador específico por su ID
 router.get('/worker/:userId', getWorkerSkills);
