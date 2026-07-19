@@ -45,13 +45,6 @@ export const login = async (req, res) => {
 
         const user = await User.findOne({ email, password });
 
-        if (user.active === false) {
-            return res.status(403).json({
-                success: false,
-                message: 'Usuario inactivo'
-            });
-        }
-
         if (!user) {
             return res.status(401).json({
                 success: false,
@@ -133,7 +126,7 @@ export const updateProfile = async (req, res) => {
                 }
             }
 
-            data.profilePhoto = req.file.path;
+            updates.profilePhoto = req.file.path;
         }
 
         const userExist = await User.findById(id);
@@ -160,6 +153,30 @@ export const updateProfile = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error al actualizar perfil',
+            error: error.message
+        });
+    }
+};
+
+export const getProfileByEmail = async (req, res) => {
+    try {
+        const { email } = req.params;
+        const user = await User.findOne({ email: email.toLowerCase() });
+        if (!user) return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+        res.status(200).json({ success: true, data: user });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Error', error: error.message });
+    }
+};
+
+export const getAllUsers = async (req, res) => {
+    try {
+        const users = await User.find({ active: true }).select('-password');
+        res.status(200).json({ success: true, data: users });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error al obtener usuarios',
             error: error.message
         });
     }

@@ -39,13 +39,15 @@ export const validateCreateUser = [
         .optional(),
 
     body('latitude')
-        .notEmpty().withMessage('Latitud es requerida'),
+        .optional()
+        .isFloat().withMessage('Latitud debe ser numérica'),
 
     body('longitude')
-        .notEmpty().withMessage('Longitud es requerida'),
+        .optional()
+        .isFloat().withMessage('Longitud debe ser numérica'),
 
     body('address')
-        .notEmpty().withMessage('Dirección es requerida'),
+        .optional(),
 
     checkValidators
 ];
