@@ -48,7 +48,7 @@ export const getServicesByWorker = async (req, res) => {
         const services = await Service.find({ workerId })
             .populate({
                 path: 'requestId',
-                select: 'title description address categoryId budgetMin budgetMax status',
+                select: 'title description serviceImage address categoryId budgetMin budgetMax status',
                 populate: {
                     path: 'categoryId',
                     select: 'name'

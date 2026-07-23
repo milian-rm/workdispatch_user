@@ -87,7 +87,7 @@ export const getProposalsByWorker = async (req, res) => {
         const proposals = await Proposal.find({ workerId, deletedAt: null })
             .populate({
                 path: 'serviceRequestId',
-                select: 'title description address budgetMin budgetMax categoryId status createdAt',
+                select: 'title description serviceImage address budgetMin budgetMax categoryId status createdAt',
                 populate: {
                     path: 'categoryId',
                     select: 'name'
