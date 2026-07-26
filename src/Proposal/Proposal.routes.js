@@ -15,6 +15,7 @@ import {
     validateProposalId, 
     validateServiceRequestId 
 } from '../../middlewares/proposal.validator.js';
+import { validateJWT } from '../../middlewares/validate-jwt.js';
 
 const api = Router();
 
@@ -25,8 +26,8 @@ api.put('/:id', [validateProposalId, validateProposal], updateProposal);
 api.patch('/cancel/:id', [validateProposalId], cancelProposal);
 
 // Acciones del CLIENT
-api.get('/requests/:serviceRequestId', [validateServiceRequestId], getProposalsByServiceRequest);
-api.patch('/accept/:id', [validateProposalId], acceptProposal);
-api.patch('/reject/:id', [validateProposalId], rejectProposal);
+api.get('/requests/:serviceRequestId', validateJWT, [validateServiceRequestId], getProposalsByServiceRequest);
+api.patch('/accept/:id', validateJWT, [validateProposalId], acceptProposal);
+api.patch('/reject/:id', validateJWT, [validateProposalId], rejectProposal);
 
 export default api;

@@ -30,6 +30,20 @@ export const createServiceRequest = async (req, res) => {
     try {
         const data = { ...req.body };
         data.clientId = req.user._id;
+
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+        const todayCount = await ServiceRequest.countDocuments({
+            clientId: req.user._id,
+            createdAt: { $gte: startOfDay }
+        });
+        if (todayCount >= 5) {
+            return res.status(400).json({
+                success: false,
+                message: 'Alcanzaste el límite de 5 solicitudes por día. Intentá de nuevo mañana.'
+            });
+        }
+
         applyUploadedImage(data, req);
 
         const serviceRequest = new ServiceRequest(data);
