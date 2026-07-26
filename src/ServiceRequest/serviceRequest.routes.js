@@ -1,15 +1,18 @@
 
 import { Router } from 'express';
-import { 
-    createServiceRequest, 
-    updateServiceRequest, 
-    cancelServiceRequest, 
-    getOpenRequests 
+import {
+    createServiceRequest,
+    updateServiceRequest,
+    cancelServiceRequest,
+    getOpenRequests,
+    getMyServiceRequests,
+    getServiceRequestById
 } from './serviceRequest.controller.js';
 // Imports de validadores
 import { validateCreateServiceRequest, validateServiceRequestId } from '../../middlewares/serviceRequest-validator.js';
 import { uploadServiceRequestImage } from '../../middlewares/file-uploader.js';
 import { cleanupUploadedFileOnFinish, deleteFileOnError } from '../../middlewares/delete-file-on-error.js';
+import { validateJWT } from '../../middlewares/validate-jwt.js';
 
 const router = Router();
 const uploadServiceRequestPhoto = uploadServiceRequestImage.fields([
@@ -21,6 +24,7 @@ const uploadServiceRequestPhoto = uploadServiceRequestImage.fields([
 // CLIENTE: Crear, Editar y Cancelar
 router.post(
     '/',
+    validateJWT,
     uploadServiceRequestPhoto,
     cleanupUploadedFileOnFinish,
     validateCreateServiceRequest,
@@ -29,6 +33,7 @@ router.post(
 );
 router.put(
     '/:id',
+    validateJWT,
     validateServiceRequestId,
     uploadServiceRequestPhoto,
     cleanupUploadedFileOnFinish,
@@ -36,9 +41,13 @@ router.put(
     updateServiceRequest,
     deleteFileOnError
 );
-router.patch('/cancel/:id', [validateServiceRequestId], cancelServiceRequest);
+router.patch('/cancel/:id', validateJWT, [validateServiceRequestId], cancelServiceRequest);
 
 // WORKER: Ver disponibles
 router.get('/open', getOpenRequests);
+
+// CLIENTE: Ver mis solicitudes y detalle
+router.get('/mine', validateJWT, getMyServiceRequests);
+router.get('/:id', validateJWT, validateServiceRequestId, getServiceRequestById);
 
 export default router;

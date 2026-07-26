@@ -88,10 +88,10 @@ export const cancelServiceRequest = async (req, res) => {
 export const getOpenRequests = async (req, res) => {
     try {
         const { categoryId } = req.query;
-        
+
         // Agregamos isActive: true al filtro
-        const filter = { status: 'OPEN', isActive: true }; 
-        
+        const filter = { status: 'OPEN', isActive: true };
+
         if (categoryId) filter.categoryId = categoryId;
 
         const requests = await ServiceRequest.find(filter)
@@ -99,6 +99,41 @@ export const getOpenRequests = async (req, res) => {
             .populate('categoryId', 'name');
 
         res.status(200).json({ success: true, data: requests });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
+// CLIENT: Ver mis propias solicitudes (con filtro opcional por status)
+export const getMyServiceRequests = async (req, res) => {
+    try {
+        const { status } = req.query;
+        const filter = { clientId: req.user._id, isActive: true };
+        if (status) filter.status = status;
+
+        const requests = await ServiceRequest.find(filter)
+            .populate('categoryId', 'name')
+            .sort({ createdAt: -1 });
+
+        res.status(200).json({ success: true, data: requests });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
+// CLIENT: Ver el detalle de UNA de mis solicitudes
+export const getServiceRequestById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const request = await ServiceRequest.findOne({ _id: id, clientId: req.user._id })
+            .populate('categoryId', 'name')
+            .populate('clientId', 'firstName lastName profilePhoto');
+
+        if (!request) {
+            return res.status(404).json({ success: false, message: 'Solicitud no encontrada' });
+        }
+
+        res.status(200).json({ success: true, data: request });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
