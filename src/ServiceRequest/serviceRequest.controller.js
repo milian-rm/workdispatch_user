@@ -29,6 +29,7 @@ const applyUploadedImage = (data, req) => {
 export const createServiceRequest = async (req, res) => {
     try {
         const data = { ...req.body };
+        data.clientId = req.user._id;
         applyUploadedImage(data, req);
 
         const serviceRequest = new ServiceRequest(data);
