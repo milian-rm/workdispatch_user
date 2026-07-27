@@ -38,3 +38,13 @@ export const validateServiceRequestId = [
         .isMongoId().withMessage('El ID de la solicitud no es un formato de MongoDB válido'),
     checkValidators
 ];
+
+export const validateRejectProposal = [
+    param('id')
+        .isMongoId().withMessage('El ID de la propuesta no es un formato de MongoDB válido'),
+    body('reason')
+        .trim()
+        .notEmpty().withMessage('El motivo del rechazo es requerido')
+        .isLength({ min: 5, max: 300 }).withMessage('El motivo debe tener entre 5 y 300 caracteres'),
+    checkValidators
+];

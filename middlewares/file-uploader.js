@@ -77,6 +77,10 @@ export const uploadworkerPortfolioImage = createCloudinaryUploader(
     process.env.CLOUDINARY_FOLDER || 'WorkDispatch/workerPortfolio'
 );
 
+export const uploadServiceRequestImage = createCloudinaryUploader(
+    process.env.CLOUDINARY_SERVICE_REQUESTS_FOLDER || 'workDispatch/serviceRequests'
+);
+
 // ----------------------------------------------------------------------------------------------------------
 
 // Export cloudinary instance para usar en delete-file-on-error

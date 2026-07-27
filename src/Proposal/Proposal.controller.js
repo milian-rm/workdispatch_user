@@ -1,7 +1,7 @@
 'use strict';
 
+import mongoose from 'mongoose';
 import Proposal from './Proposal.model.js';
-import Service from '../Service/Service.model.js';
 import ServiceRequest from '../ServiceRequest/serviceRequest.model.js';
 import { createServiceFromProposal } from '../Service/Service.controller.js';
 import { createAutomaticNotification } from '../helpers/notification.helper.js';
@@ -76,11 +76,45 @@ export const cancelProposal = async (req, res) => {
     }
 };
 
+export const getProposalsByWorker = async (req, res) => {
+    try {
+        const { workerId } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(workerId)) {
+            return res.send({ success: true, proposals: [] });
+        }
+
+        const proposals = await Proposal.find({ workerId, deletedAt: null })
+            .populate({
+                path: 'serviceRequestId',
+                select: 'title description serviceImage address budgetMin budgetMax categoryId status createdAt',
+                populate: {
+                    path: 'categoryId',
+                    select: 'name'
+                }
+            })
+            .sort({ createdAt: -1 });
+
+        return res.send({ success: true, proposals });
+    } catch (err) {
+        return res.status(500).send({ success: false, message: 'Error al obtener propuestas del trabajador', err: err.message });
+    }
+};
+
 // CLIENT: Ver Propuestas para su solicitud
 export const getProposalsByServiceRequest = async (req, res) => {
     try {
         const { serviceRequestId } = req.params;
-        const proposals = await Proposal.find({ serviceRequestId });
+        const serviceRequest = await ServiceRequest.findById(serviceRequestId);
+        if (!serviceRequest) {
+            return res.status(404).send({ success: false, message: 'Solicitud no encontrada' });
+        }
+        if (serviceRequest.clientId.toString() !== req.user._id.toString()) {
+            return res.status(403).send({ success: false, message: 'No tienes permiso para ver estas propuestas' });
+        }
+        const proposals = await Proposal.find({ serviceRequestId })
+            .populate('workerId', 'firstName lastName profilePhoto ratingAverage phone')
+            .sort({ createdAt: -1 });
         return res.send({ success: true, proposals });
     } catch (err) {
         return res.status(500).send({ success: false, message: 'Error al obtener propuestas' });
@@ -105,6 +139,11 @@ export const acceptProposal = async (req, res) => {
         const serviceRequest = await ServiceRequest.findById(proposal.serviceRequestId);
         if (!serviceRequest) {
             return res.status(404).send({ success: false, message: 'Solicitud de servicio no encontrada' });
+        }
+
+        // 3. Verificar que quien acepta es el dueño de la solicitud
+        if (serviceRequest.clientId.toString() !== req.user._id.toString()) {
+            return res.status(403).send({ success: false, message: 'No tienes permiso para esta acción' });
         }
 
         // 3. Aceptar la propuesta
@@ -150,7 +189,22 @@ export const acceptProposal = async (req, res) => {
 export const rejectProposal = async (req, res) => {
     try {
         const { id } = req.params;
-        await Proposal.findByIdAndUpdate(id, { status: 'REJECTED' });
+        const { reason } = req.body;
+        const proposal = await Proposal.findById(id);
+        if (!proposal) {
+            return res.status(404).send({ success: false, message: 'Propuesta no encontrada' });
+        }
+
+        const serviceRequest = await ServiceRequest.findById(proposal.serviceRequestId);
+        if (!serviceRequest) {
+            return res.status(404).send({ success: false, message: 'Solicitud de servicio no encontrada' });
+        }
+
+        if (serviceRequest.clientId.toString() !== req.user._id.toString()) {
+            return res.status(403).send({ success: false, message: 'No tienes permiso para esta acción' });
+        }
+
+        await Proposal.findByIdAndUpdate(id, { status: 'REJECTED', rejectionReason: reason });
         return res.send({ success: true, message: 'Propuesta rechazada' });
     } catch (err) {
         return res.status(500).send({ success: false, message: 'Error al rechazar' });

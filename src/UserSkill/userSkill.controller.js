@@ -1,5 +1,19 @@
 'use strict';
+import mongoose from 'mongoose';
 import UserSkill from './userSkill.model.js';
+
+const emptySkillsResponse = (res) => res.status(200).json({ success: true, data: [] });
+
+const getSkillsByUserId = (userId) => {
+    return UserSkill.find({ userId }).populate({
+        path: 'skillId',
+        select: 'name categoryId',
+        populate: {
+            path: 'categoryId',
+            select: 'name'
+        }
+    });
+};
 
 // WORKER: Agregar UserSkill 
 export const addUserSkill = async (req, res) => {
@@ -43,8 +57,13 @@ export const updateUserSkill = async (req, res) => {
 // WORKER: Ver sus propias habilidades 
 export const getMySkills = async (req, res) => {
     try {
-        const { userId } = req.params;
-        const skills = await UserSkill.find({ userId }).populate('skillId', 'name');
+        const userId = req.params.userId || req.params.id;
+
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return emptySkillsResponse(res);
+        }
+
+        const skills = await getSkillsByUserId(userId);
         res.status(200).json({ success: true, data: skills });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
@@ -55,7 +74,12 @@ export const getMySkills = async (req, res) => {
 export const getWorkerSkills = async (req, res) => {
     try {
         const { userId } = req.params;
-        const skills = await UserSkill.find({ userId }).populate('skillId', 'name');
+
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return emptySkillsResponse(res);
+        }
+
+        const skills = await getSkillsByUserId(userId);
         res.status(200).json({ success: true, data: skills });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });

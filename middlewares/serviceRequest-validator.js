@@ -10,8 +10,19 @@ export const validateCreateServiceRequest = [
         .notEmpty().withMessage('La descripción es obligatoria'),
     
     body('categoryId')
-        .notEmpty().withMessage('La categoría es obligatoria')
+        .optional({ checkFalsy: true })
         .isMongoId().withMessage('El ID de la categoría debe ser un formato válido de MongoDB'),
+
+    body('customCategory')
+        .optional({ checkFalsy: true })
+        .isLength({ max: 100 }).withMessage('La categoría personalizada no puede exceder 100 caracteres'),
+
+    body().custom((_, { req }) => {
+        if (!req.body.categoryId && !req.body.customCategory) {
+            throw new Error('Debés seleccionar una categoría o escribir una personalizada');
+        }
+        return true;
+    }),
     
     body('latitude') 
         .notEmpty().withMessage('La latitud es obligatoria')

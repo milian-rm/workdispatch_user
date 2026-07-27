@@ -28,6 +28,7 @@ import ServiceRequestRoutes from '../src/ServiceRequest/serviceRequest.routes.js
 import UserSkillRoutes from '../src/UserSkill/userSkill.routes.js';
 import conversationRoutes from '../src/Conversation/conversation.routes.js'
 import messageRoutes from '../src/Message/message.routes.js';
+import aiRoutes from '../src/Ai/ai.routes.js';
 
 const middleware = (app) => {
     app.use(helmet(helmetConfiguration));
@@ -57,6 +58,7 @@ const routes = (app) => {
 
     app.use(`${BASE_URL}/conversations`, conversationRoutes);
     app.use(`${BASE_URL}/messages`, messageRoutes);    
+    app.use(`${BASE_URL}/ai`, aiRoutes);
 
 }
 

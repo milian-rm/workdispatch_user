@@ -1,5 +1,6 @@
 'use strict';
 
+import mongoose from 'mongoose';
 import Service from './Service.model.js';
 import { createAutomaticNotification } from '../helpers/notification.helper.js';
 
@@ -33,6 +34,32 @@ export const getServiceStatus = async (req, res) => {
         return res.send({ success: true, service });
     } catch (err) {
         return res.status(500).send({ success: false, message: 'Error al consultar el servicio', err: err.message });
+    }
+};
+
+export const getServicesByWorker = async (req, res) => {
+    try {
+        const { workerId } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(workerId)) {
+            return res.send({ success: true, services: [] });
+        }
+
+        const services = await Service.find({ workerId })
+            .populate({
+                path: 'requestId',
+                select: 'title description serviceImage address categoryId budgetMin budgetMax status',
+                populate: {
+                    path: 'categoryId',
+                    select: 'name'
+                }
+            })
+            .populate('clientId', 'firstName lastName email profilePhoto')
+            .sort({ createdAt: -1 });
+
+        return res.send({ success: true, services });
+    } catch (err) {
+        return res.status(500).send({ success: false, message: 'Error al obtener servicios del trabajador', err: err.message });
     }
 };
 

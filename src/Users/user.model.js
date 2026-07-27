@@ -1,6 +1,11 @@
 import { Schema, model } from 'mongoose';
 
 const userSchema = Schema({
+    authUserId: {
+        type: String,
+        unique: true,
+        sparse: true
+    },
     firstName: {
         type: String,
         required: [true, 'El nombre es obligatorio'],
@@ -18,13 +23,9 @@ const userSchema = Schema({
         lowercase: true,
         trim: true
     },
-    password: {
-        type: String,
-        required: [true, 'La contraseña es obligatoria']
-    },
     phone: {
         type: String,
-        required: [true, 'El teléfono es obligatorio']
+        required: [true, 'El telefono es obligatorio']
     },
     role: {
         type: String,
