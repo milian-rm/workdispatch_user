@@ -26,7 +26,7 @@ export const addRecord = async (req, res) => {
         return res.status(201).send({ 
             success: true, 
             message: 'Registro añadido al portafolio con imagen exitosamente', 
-            record 
+            data: record 
         });
     } catch (err) {
         return res.status(500).send({ 
@@ -46,7 +46,7 @@ export const getMyPortfolio = async (req, res) => {
             status: 'ACTIVE' 
         });
 
-        return res.send({ success: true, portfolio });
+        return res.send({ success: true, data: portfolio });
     } catch (err) {
         return res.status(500).send({ 
             success: false, 
@@ -64,7 +64,7 @@ export const getPortfolioByWorker = async (req, res) => {
             status: 'ACTIVE' 
         });
 
-        return res.send({ success: true, portfolio });
+        return res.send({ success: true, data: portfolio });
     } catch (err) {
         return res.status(500).send({ 
             success: false, 
@@ -83,7 +83,7 @@ export const updateRecord = async (req, res) => {
 
         if (!updated) return res.status(404).send({ success: false, message: 'Registro no encontrado' });
 
-        return res.send({ success: true, message: 'Registro actualizado', updated });
+        return res.send({ success: true, message: 'Registro actualizado', data: updated });
     } catch (err) {
         return res.status(500).send({ 
             success: false, 
@@ -109,7 +109,7 @@ export const changeStatus = async (req, res) => {
         return res.send({ 
             success: true, 
             message: `Registro marcado como ${record.status}`, 
-            record 
+            data: record 
         });
     } catch (err) {
         return res.status(500).send({ success: false, message: 'Error al cambiar el estado' });

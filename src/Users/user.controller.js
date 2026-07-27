@@ -200,6 +200,7 @@ export const login = async (req, res) => {
                 || authError.message
                 || 'Error al iniciar sesion en AuthService';
 
+<<<<<<< HEAD
             console.error('AuthService login error:', authError.response?.data || authError.message);
 
             return res.status(status === 401 || status === 403 ? status : 500).json({
@@ -218,6 +219,8 @@ export const login = async (req, res) => {
 
         const user = await User.findOne({ $or: searchFilters });
 
+=======
+>>>>>>> ft/BradleyOliva
         if (!user) {
             return res.status(404).json({
                 success: false,
@@ -340,3 +343,30 @@ export const updateProfile = async (req, res) => {
         });
     }
 };
+<<<<<<< HEAD
+=======
+
+export const getProfileByEmail = async (req, res) => {
+    try {
+        const { email } = req.params;
+        const user = await User.findOne({ email: email.toLowerCase() });
+        if (!user) return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+        res.status(200).json({ success: true, data: user });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Error', error: error.message });
+    }
+};
+
+export const getAllUsers = async (req, res) => {
+    try {
+        const users = await User.find({ active: true }).select('-password');
+        res.status(200).json({ success: true, data: users });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error al obtener usuarios',
+            error: error.message
+        });
+    }
+};
+>>>>>>> ft/BradleyOliva

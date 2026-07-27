@@ -41,7 +41,12 @@ export const validateCreateUser = [
         .optional(),
 
     body('longitude')
-        .optional(),
+        .optional()
+        .isFloat().withMessage('Latitud debe ser numérica'),
+
+    body('longitude')
+        .optional()
+        .isFloat().withMessage('Longitud debe ser numérica'),
 
     body('address')
         .optional(),
