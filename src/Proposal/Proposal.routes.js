@@ -13,7 +13,8 @@ import {
 import { 
     validateProposal, 
     validateProposalId, 
-    validateServiceRequestId 
+    validateServiceRequestId,
+    validateRejectProposal
 } from '../../middlewares/proposal.validator.js';
 import { validateJWT } from '../../middlewares/validate-jwt.js';
 
@@ -28,6 +29,6 @@ api.patch('/cancel/:id', [validateProposalId], cancelProposal);
 // Acciones del CLIENT
 api.get('/requests/:serviceRequestId', validateJWT, [validateServiceRequestId], getProposalsByServiceRequest);
 api.patch('/accept/:id', validateJWT, [validateProposalId], acceptProposal);
-api.patch('/reject/:id', validateJWT, [validateProposalId], rejectProposal);
+api.patch('/reject/:id', validateJWT, [validateRejectProposal], rejectProposal);
 
 export default api;

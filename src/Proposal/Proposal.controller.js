@@ -189,6 +189,7 @@ export const acceptProposal = async (req, res) => {
 export const rejectProposal = async (req, res) => {
     try {
         const { id } = req.params;
+        const { reason } = req.body;
         const proposal = await Proposal.findById(id);
         if (!proposal) {
             return res.status(404).send({ success: false, message: 'Propuesta no encontrada' });
@@ -203,7 +204,7 @@ export const rejectProposal = async (req, res) => {
             return res.status(403).send({ success: false, message: 'No tienes permiso para esta acción' });
         }
 
-        await Proposal.findByIdAndUpdate(id, { status: 'REJECTED' });
+        await Proposal.findByIdAndUpdate(id, { status: 'REJECTED', rejectionReason: reason });
         return res.send({ success: true, message: 'Propuesta rechazada' });
     } catch (err) {
         return res.status(500).send({ success: false, message: 'Error al rechazar' });

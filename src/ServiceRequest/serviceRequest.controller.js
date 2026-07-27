@@ -2,6 +2,7 @@
 
 import ServiceRequest from './serviceRequest.model.js';
 import { createAutomaticNotification } from '../helpers/notification.helper.js';
+import { resolveOrCreateCategory } from '../helpers/category.helper.js';
 import { cloudinary } from '../../middlewares/file-uploader.js';
 
 const getUploadedServiceRequestImage = (req) => {
@@ -45,7 +46,10 @@ export const createServiceRequest = async (req, res) => {
         }
 
         applyUploadedImage(data, req);
-
+        if (data.customCategory && !data.categoryId) {
+            data.categoryId = await resolveOrCreateCategory(data.customCategory);
+            data.customCategory = null;
+        }
         const serviceRequest = new ServiceRequest(data);
         await serviceRequest.save();
 
