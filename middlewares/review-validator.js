@@ -8,6 +8,7 @@ export const createReviewValidator = [
     body('revieweredId', 'El ID del evaluado es obligatorio y debe ser un MongoID válido').isMongoId(),
     body('Rating', 'El rating debe ser un número entero entre 1 y 5').isInt({ min: 1, max: 5 }),
     body('Comment', 'El comentario es obligatorio').notEmpty(),
+    body('LowRatingReasons').optional().isArray().withMessage('LowRatingReasons debe ser un arreglo'),
     checkValidators // Tu manejador de errores
 ];
 

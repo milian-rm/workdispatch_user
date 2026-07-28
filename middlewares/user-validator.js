@@ -5,10 +5,12 @@ const userRoles = ['CLIENT', 'WORKER', 'ADMIN'];
 
 export const validateCreateUser = [
     body('firstName')
-        .notEmpty().withMessage('Nombre es obligatorio'),
+        .notEmpty().withMessage('Nombre es obligatorio')
+        .matches(/^[a-zA-ZÀ-ÿñÑ\s]+$/).withMessage('Nombre solo puede contener letras'),
 
     body('lastName')
-        .notEmpty().withMessage('Apellido es obligatorio'),
+        .notEmpty().withMessage('Apellido es obligatorio')
+        .matches(/^[a-zA-ZÀ-ÿñÑ\s]+$/).withMessage('Apellido solo puede contener letras'),
 
     body('email')
         .notEmpty().withMessage('Email es requerido')
@@ -18,7 +20,8 @@ export const validateCreateUser = [
         .notEmpty().withMessage('La contrasena es obligatoria'),
 
     body('phone')
-        .optional(),
+        .optional()
+        .matches(/^[0-9+\-\s()]+$/).withMessage('Telefono contiene caracteres no validos'),
 
     body('role')
         .optional()
@@ -59,10 +62,12 @@ export const validateUpdateUser = [
         .isMongoId().withMessage('ID User invalido'),
 
     body('firstName')
-        .optional(),
+        .optional()
+        .matches(/^[a-zA-ZÀ-ÿñÑ\s]+$/).withMessage('Nombre solo puede contener letras'),
 
     body('lastName')
-        .optional(),
+        .optional()
+        .matches(/^[a-zA-ZÀ-ÿñÑ\s]+$/).withMessage('Apellido solo puede contener letras'),
 
     body('email')
         .optional()
@@ -72,7 +77,8 @@ export const validateUpdateUser = [
         .optional(),
 
     body('phone')
-        .optional(),
+        .optional()
+        .matches(/^[0-9+\-\s()]+$/).withMessage('Telefono contiene caracteres no validos'),
 
     body('role')
         .optional()

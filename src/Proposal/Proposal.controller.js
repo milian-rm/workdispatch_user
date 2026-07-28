@@ -9,7 +9,8 @@ import { createAutomaticNotification } from '../helpers/notification.helper.js';
 // WORKER: Crear Propuesta
 export const createProposal = async (req, res) => {
     try {
-        const { serviceRequestId, workerId } = req.body;
+        const { serviceRequestId } = req.body;
+        const workerId = req.user._id;
 
         // Validamos si la solicitud ya tiene una propuesta acepotada
         const acceptedProposal = await Proposal.findOne({
@@ -34,7 +35,7 @@ export const createProposal = async (req, res) => {
             });
         }
 
-        const proposal = new Proposal(req.body);
+        const proposal = new Proposal({ ...req.body, workerId });
         await proposal.save();
 
         const request = await ServiceRequest.findById(serviceRequestId);
@@ -57,8 +58,12 @@ export const updateProposal = async (req, res) => {
     try {
         const { id } = req.params;
         const data = req.body;
-        const updated = await Proposal.findOneAndUpdate({ _id: id, status: 'PENDING' }, data, { new: true });
-        if (!updated) return res.status(404).send({ success: false, message: 'Propuesta no encontrada o ya no se puede editar' });
+        const proposal = await Proposal.findOne({ _id: id, status: 'PENDING' });
+        if (!proposal) return res.status(404).send({ success: false, message: 'Propuesta no encontrada o ya no se puede editar' });
+        if (proposal.workerId.toString() !== req.user._id.toString()) {
+            return res.status(403).send({ success: false, message: 'No tienes permiso para editar esta propuesta' });
+        }
+        const updated = await Proposal.findByIdAndUpdate(id, data, { new: true });
         return res.send({ success: true, message: 'Propuesta actualizada', updated });
     } catch (err) {
         return res.status(500).send({ success: false, message: 'Error al actualizar', err: err.message });
@@ -69,8 +74,13 @@ export const updateProposal = async (req, res) => {
 export const cancelProposal = async (req, res) => {
     try {
         const { id } = req.params;
-        const proposal = await Proposal.findByIdAndUpdate(id, { status: 'CANCELLED' }, { new: true });
-        return res.send({ success: true, message: 'Propuesta cancelada', proposal });
+        const proposal = await Proposal.findById(id);
+        if (!proposal) return res.status(404).send({ success: false, message: 'Propuesta no encontrada' });
+        if (proposal.workerId.toString() !== req.user._id.toString()) {
+            return res.status(403).send({ success: false, message: 'No tienes permiso para cancelar esta propuesta' });
+        }
+        const updated = await Proposal.findByIdAndUpdate(id, { status: 'CANCELLED' }, { new: true });
+        return res.send({ success: true, message: 'Propuesta cancelada', proposal: updated });
     } catch (err) {
         return res.status(500).send({ success: false, message: 'Error al cancelar' });
     }
@@ -101,7 +111,7 @@ export const getProposalsByWorker = async (req, res) => {
     }
 };
 
-// CLIENT: Ver Propuestas para su solicitud
+// Ver Propuestas para una solicitud (cliente ve todas, worker ACCEPTED ve solo la suya)
 export const getProposalsByServiceRequest = async (req, res) => {
     try {
         const { serviceRequestId } = req.params;
@@ -109,13 +119,27 @@ export const getProposalsByServiceRequest = async (req, res) => {
         if (!serviceRequest) {
             return res.status(404).send({ success: false, message: 'Solicitud no encontrada' });
         }
-        if (serviceRequest.clientId.toString() !== req.user._id.toString()) {
+
+        const isClient = serviceRequest.clientId.toString() === req.user._id.toString();
+
+        if (isClient) {
+            const proposals = await Proposal.find({ serviceRequestId })
+                .populate('workerId', 'firstName lastName profilePhoto ratingAverage phone')
+                .sort({ createdAt: -1 });
+            return res.send({ success: true, proposals });
+        }
+
+        const myAccepted = await Proposal.findOne({
+            serviceRequestId,
+            workerId: req.user._id,
+            status: 'ACCEPTED',
+        }).populate('workerId', 'firstName lastName profilePhoto ratingAverage phone');
+
+        if (!myAccepted) {
             return res.status(403).send({ success: false, message: 'No tienes permiso para ver estas propuestas' });
         }
-        const proposals = await Proposal.find({ serviceRequestId })
-            .populate('workerId', 'firstName lastName profilePhoto ratingAverage phone')
-            .sort({ createdAt: -1 });
-        return res.send({ success: true, proposals });
+
+        return res.send({ success: true, proposals: [myAccepted] });
     } catch (err) {
         return res.status(500).send({ success: false, message: 'Error al obtener propuestas' });
     }
@@ -205,6 +229,12 @@ export const rejectProposal = async (req, res) => {
         }
 
         await Proposal.findByIdAndUpdate(id, { status: 'REJECTED', rejectionReason: reason });
+
+        const rejectionMsg = reason
+            ? `Tu propuesta fue rechazada. Razón: ${reason}`
+            : 'Tu propuesta fue rechazada.';
+        await createAutomaticNotification(proposal.workerId, rejectionMsg, 'PROPOSAL_REJECTED');
+
         return res.send({ success: true, message: 'Propuesta rechazada' });
     } catch (err) {
         return res.status(500).send({ success: false, message: 'Error al rechazar' });

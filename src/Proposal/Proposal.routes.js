@@ -17,18 +17,19 @@ import {
     validateRejectProposal
 } from '../../middlewares/proposal.validator.js';
 import { validateJWT } from '../../middlewares/validate-jwt.js';
+import { requireVerification } from '../../middlewares/require-verification.js';
 
 const api = Router();
 
 // Acciones del WORKER
-api.post('/', [validateProposal], createProposal);
-api.get('/worker/:workerId', getProposalsByWorker);
-api.put('/:id', [validateProposalId, validateProposal], updateProposal);
-api.patch('/cancel/:id', [validateProposalId], cancelProposal);
+api.post('/', validateJWT, [validateProposal], requireVerification, createProposal);
+api.get('/worker/:workerId', validateJWT, getProposalsByWorker);
+api.put('/:id', validateJWT, [validateProposalId, validateProposal], updateProposal);
+api.patch('/cancel/:id', validateJWT, [validateProposalId], cancelProposal);
 
 // Acciones del CLIENT
 api.get('/requests/:serviceRequestId', validateJWT, [validateServiceRequestId], getProposalsByServiceRequest);
-api.patch('/accept/:id', validateJWT, [validateProposalId], acceptProposal);
-api.patch('/reject/:id', validateJWT, [validateRejectProposal], rejectProposal);
+api.patch('/accept/:id', validateJWT, requireVerification, [validateProposalId], acceptProposal);
+api.patch('/reject/:id', validateJWT, requireVerification, [validateRejectProposal], rejectProposal);
 
 export default api;
