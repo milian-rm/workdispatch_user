@@ -54,7 +54,7 @@ export const getVerificationById = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const verification = await Verification.findById(id)
+        const verification = await Verification.findOne({ userId: id })
             .populate('userId', 'firstName lastName email')
             .populate('reviewedBy', 'firstName lastName email');
 

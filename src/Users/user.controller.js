@@ -3,6 +3,10 @@
 import jwt from 'jsonwebtoken';
 import axios from 'axios';
 import User from './user.model.js';
+import Service from '../Service/Service.model.js';
+import Proposal from '../Proposal/Proposal.model.js';
+import Review from '../Review/review.model.js';
+import ServiceRequest from '../ServiceRequest/serviceRequest.model.js';
 import { cloudinary } from '../../middlewares/file-uploader.js';
 
 const AUTH_SERVICE_URL = process.env.AUTH_URL;
@@ -200,7 +204,6 @@ export const login = async (req, res) => {
                 || authError.message
                 || 'Error al iniciar sesion en AuthService';
 
-<<<<<<< HEAD
             console.error('AuthService login error:', authError.response?.data || authError.message);
 
             return res.status(status === 401 || status === 403 ? status : 500).json({
@@ -219,8 +222,6 @@ export const login = async (req, res) => {
 
         const user = await User.findOne({ $or: searchFilters });
 
-=======
->>>>>>> ft/BradleyOliva
         if (!user) {
             return res.status(404).json({
                 success: false,
@@ -343,8 +344,6 @@ export const updateProfile = async (req, res) => {
         });
     }
 };
-<<<<<<< HEAD
-=======
 
 export const getProfileByEmail = async (req, res) => {
     try {
@@ -369,4 +368,67 @@ export const getAllUsers = async (req, res) => {
         });
     }
 };
->>>>>>> ft/BradleyOliva
+
+export const getTrustStats = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const user = await User.findById(id).select('createdAt ratingAverage');
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+        }
+
+        const [completedJobs, cancelledJobs, reviews, proposalsWithRequest] = await Promise.all([
+            Service.countDocuments({ workerId: id, status: 'COMPLETED' }),
+            Service.countDocuments({ workerId: id, status: 'CANCELLED' }),
+            Review.find({ revieweredId: id }).select('Rating'),
+            Proposal.find({ workerId: id })
+                .populate({ path: 'serviceRequestId', select: 'createdAt' }),
+        ]);
+
+        const total = completedJobs + cancelledJobs;
+        const completionRate = total > 0 ? completedJobs / total : null;
+
+        let avgResponseTimeHours = null;
+        const responseTimes = proposalsWithRequest
+            .filter((p) => p.serviceRequestId?.createdAt)
+            .map((p) => (new Date(p.createdAt) - new Date(p.serviceRequestId.createdAt)) / (1000 * 60 * 60))
+            .filter((h) => h >= 0);
+        if (responseTimes.length > 0) {
+            avgResponseTimeHours = Math.round(responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length * 10) / 10;
+        }
+
+        const services = await Service.find({ workerId: id }).select('clientId');
+        const clientCounts = {};
+        services.forEach((s) => {
+            const cid = s.clientId?.toString();
+            if (cid) clientCounts[cid] = (clientCounts[cid] || 0) + 1;
+        });
+        const repeatClientsCount = Object.values(clientCounts).filter((c) => c > 1).length;
+
+        const ratingCount = reviews.length;
+        const ratingAverage = ratingCount > 0
+            ? Math.round(reviews.reduce((sum, r) => sum + r.Rating, 0) / ratingCount * 10) / 10
+            : user.ratingAverage || 0;
+
+        res.status(200).json({
+            success: true,
+            data: {
+                completedJobs,
+                cancelledJobs,
+                completionRate,
+                avgResponseTimeHours,
+                memberSince: user.createdAt,
+                repeatClientsCount,
+                ratingAverage,
+                ratingCount,
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error al obtener estadísticas de confianza',
+            error: error.message
+        });
+    }
+};

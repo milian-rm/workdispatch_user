@@ -5,7 +5,8 @@ import {
     getProfile,
     updateProfile,
     getProfileByEmail,
-    getAllUsers           
+    getAllUsers,
+    getTrustStats
 } from './user.controller.js';
 import { uploadUserProfileImage } from '../../middlewares/file-uploader.js';
 import {
@@ -17,11 +18,12 @@ import {
 
 const router = Router();
 
-router.get('/', getAllUsers);                                // ← nuevo, antes de las demás
+router.get('/', getAllUsers);
 router.post('/register', uploadUserProfileImage.single('profilePhoto'), validateCreateUser, register);
 router.post('/login', validateLoginUser, login);
-router.get('/by-email/:email', getProfileByEmail);  // ← PRIMERO
-router.get('/:id', validateUserIdParam, getProfile); // ← DESPUÉS
+router.get('/by-email/:email', getProfileByEmail);
+router.get('/:id/trust-stats', validateUserIdParam, getTrustStats);
+router.get('/:id', validateUserIdParam, getProfile);
 router.put('/:id', uploadUserProfileImage.single('profilePhoto'), validateUpdateUser, updateProfile);
 
 export default router;
