@@ -1,5 +1,6 @@
 import Message from './message.model.js';
 import Conversation from '../Conversation/conversation.model.js';
+import User from '../Users/user.model.js';
 import { createAutomaticNotification } from '../helpers/notification.helper.js';
 
 export const sendMessage = async (req, res) => {
@@ -49,10 +50,16 @@ export const sendMessage = async (req, res) => {
         await conversation.save();
 
         // Crear notificación automática
+        const sender = await User.findById(senderId).select('firstName lastName');
+        const senderName = sender ? `${sender.firstName} ${sender.lastName}` : 'Alguien';
+        const preview = content.length > 70 ? content.substring(0, 70) + '...' : content;
+        const notifMessage = `${senderName}: "${preview}"`;
+
         await createAutomaticNotification(
             receiverId,
-            'Tienes un nuevo mensaje.',
-            'NEW_MESSAGE'
+            notifMessage,
+            'NEW_MESSAGE',
+            conversationId
         );
 
         return res.send({

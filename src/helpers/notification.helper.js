@@ -2,9 +2,9 @@ import Notification from '../Notification/notification.model.js';
 import User from '../Users/user.model.js';
 
 // Notificación para un usuario específico
-export const createAutomaticNotification = async (userId, message, type) => {
+export const createAutomaticNotification = async (userId, message, type, relatedId = null) => {
     try {
-        const newNotification = new Notification({ userId, Message: message, Type: type });
+        const newNotification = new Notification({ userId, Message: message, Type: type, relatedId });
         await newNotification.save();
     } catch (error) {
         console.error('Error al lanzar la notificación automática:', error.message);
