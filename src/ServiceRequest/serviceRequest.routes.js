@@ -13,6 +13,7 @@ import { validateCreateServiceRequest, validateServiceRequestId } from '../../mi
 import { uploadServiceRequestImage } from '../../middlewares/file-uploader.js';
 import { cleanupUploadedFileOnFinish, deleteFileOnError } from '../../middlewares/delete-file-on-error.js';
 import { validateJWT } from '../../middlewares/validate-jwt.js';
+import { requireVerification } from '../../middlewares/require-verification.js';
 
 const router = Router();
 const uploadServiceRequestPhoto = uploadServiceRequestImage.fields([
@@ -25,6 +26,7 @@ const uploadServiceRequestPhoto = uploadServiceRequestImage.fields([
 router.post(
     '/',
     validateJWT,
+    requireVerification,
     uploadServiceRequestPhoto,
     cleanupUploadedFileOnFinish,
     validateCreateServiceRequest,

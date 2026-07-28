@@ -48,7 +48,22 @@ const serviceSchema = Schema({
     endDate: {
         type: Date,
         default: null
-    }
+    },
+    scheduledDate: {
+        type: Date,
+        default: null
+    },
+    estimatedDurationDays: {
+        type: Number,
+        default: null,
+        min: 1
+    },
+    workPlan: [{
+        dayNumber: { type: Number, required: true },
+        date: { type: Date, required: true },
+        description: { type: String, required: true, maxLength: 300 },
+        status: { type: String, enum: ['PENDING', 'DONE'], default: 'PENDING' }
+    }]
 }, { versionKey: false, timestamps: true });
 
 // Genera SVC-001, SVC-002...
