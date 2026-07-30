@@ -46,6 +46,11 @@ const userSchema = Schema({
         min: 1,
         max: 5
     },
+    disputeCount: {
+        type: Number,
+        default: 0,
+        min: 0
+    },
     verificationStatus: {
         type: Boolean,
         default: false
