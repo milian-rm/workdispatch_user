@@ -5,6 +5,7 @@ import {
     createProposal, 
     updateProposal, 
     cancelProposal, 
+    getProposalById,
     getProposalsByWorker,
     getProposalsByServiceRequest, 
     acceptProposal, 
@@ -24,6 +25,7 @@ const api = Router();
 // Acciones del WORKER
 api.post('/', validateJWT, [validateProposal], requireVerification, createProposal);
 api.get('/worker/:workerId', validateJWT, getProposalsByWorker);
+api.get('/:id', validateJWT, getProposalById);
 api.put('/:id', validateJWT, [validateProposalId, validateProposal], updateProposal);
 api.patch('/cancel/:id', validateJWT, [validateProposalId], cancelProposal);
 

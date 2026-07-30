@@ -6,7 +6,8 @@ import {
     updateProfile,
     getProfileByEmail,
     getAllUsers,
-    getTrustStats
+    getTrustStats,
+    getClientTrustStats
 } from './user.controller.js';
 import { uploadUserProfileImage } from '../../middlewares/file-uploader.js';
 import {
@@ -23,6 +24,7 @@ router.post('/register', uploadUserProfileImage.single('profilePhoto'), validate
 router.post('/login', validateLoginUser, login);
 router.get('/by-email/:email', getProfileByEmail);
 router.get('/:id/trust-stats', validateUserIdParam, getTrustStats);
+router.get('/:id/client-trust-stats', validateUserIdParam, getClientTrustStats);
 router.get('/:id', validateUserIdParam, getProfile);
 router.put('/:id', uploadUserProfileImage.single('profilePhoto'), validateUpdateUser, updateProfile);
 

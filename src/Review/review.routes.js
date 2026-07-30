@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createReview, getClientReviews, editReview, getWorkerReviews } from './review.controller.js';
+import { createReview, getClientReviews, editReview, getWorkerReviews, getReceivedReviews } from './review.controller.js';
 import { createReviewValidator, editReviewValidator, getReviewsValidator } from '../../middlewares/review-validator.js';
 
 const router = Router();
@@ -24,6 +24,10 @@ router.get(
     '/worker/:workerId', 
     getReviewsValidator, 
     getWorkerReviews
+);
+router.get(
+    '/received/:userId',
+    getReceivedReviews
 );
 
 export default router;

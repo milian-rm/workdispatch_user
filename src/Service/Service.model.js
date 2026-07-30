@@ -58,11 +58,31 @@ const serviceSchema = Schema({
         default: null,
         min: 1
     },
+    estimatedStartDate: {
+        type: Date,
+        default: null
+    },
+    estimatedEndDate: {
+        type: Date,
+        default: null
+    },
+    generalPlan: {
+        type: String,
+        default: '',
+        maxLength: 1000
+    },
     workPlan: [{
         dayNumber: { type: Number, required: true },
         date: { type: Date, required: true },
         description: { type: String, required: true, maxLength: 300 },
-        status: { type: String, enum: ['PENDING', 'DONE'], default: 'PENDING' }
+        status: {
+            type: String,
+            enum: ['PENDING', 'DONE', 'VERIFIED', 'DISPUTED'],
+            default: 'PENDING'
+        },
+        clientNote: { type: String, default: null, maxLength: 300 },
+        verifiedAt: { type: Date, default: null },
+        disputedAt: { type: Date, default: null }
     }]
 }, { versionKey: false, timestamps: true });
 

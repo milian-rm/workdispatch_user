@@ -2,15 +2,25 @@ import Review from './review.model.js';
 import User from '../Users/user.model.js';
 import { createAutomaticNotification } from '../helpers/notification.helper.js';
 
+const recalculateRating = async (userId) => {
+    const reviews = await Review.find({ revieweredId: userId });
+    const avg = reviews.length > 0
+        ? reviews.reduce((sum, r) => sum + r.Rating, 0) / reviews.length
+        : 1;
+    const user = await User.findById(userId);
+    if (user) {
+        user.ratingAverage = Math.round(avg * 10) / 10;
+        await user.save();
+    }
+};
+
 export const createReview = async (req, res) => {
     try {
         const data = req.body;
         const review = new Review(data);
         await review.save();
 
-        const reviews = await Review.find({ revieweredId: data.revieweredId });
-        const avg = reviews.reduce((sum, r) => sum + r.Rating, 0) / reviews.length;
-        await User.findByIdAndUpdate(data.revieweredId, { ratingAverage: Math.round(avg * 10) / 10 });
+        await recalculateRating(data.revieweredId);
 
         await createAutomaticNotification(
             data.revieweredId,
@@ -67,6 +77,8 @@ export const editReview = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Review no encontrada' });
         }
 
+        await recalculateRating(updatedReview.revieweredId);
+
         res.status(200).json({
             success: true,
             message: 'Review actualizada',
@@ -95,6 +107,26 @@ export const getWorkerReviews = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error al obtener las reviews del trabajador',
+            error: error.message
+        });
+    }
+};
+
+export const getReceivedReviews = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const reviews = await Review.find({ revieweredId: userId })
+            .populate('reviewerId', 'firstName lastName profilePhoto')
+            .populate('serviceId', 'title');
+
+        res.status(200).json({
+            success: true,
+            reviews
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error al obtener las reseñas recibidas',
             error: error.message
         });
     }

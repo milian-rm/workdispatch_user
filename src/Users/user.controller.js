@@ -6,6 +6,7 @@ import User from './user.model.js';
 import Service from '../Service/Service.model.js';
 import Proposal from '../Proposal/Proposal.model.js';
 import Review from '../Review/review.model.js';
+import Report from '../Report/report.model.js';
 import ServiceRequest from '../ServiceRequest/serviceRequest.model.js';
 import { cloudinary } from '../../middlewares/file-uploader.js';
 
@@ -378,16 +379,18 @@ export const getTrustStats = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
         }
 
-        const [completedJobs, cancelledJobs, reviews, proposalsWithRequest] = await Promise.all([
+        const [completedJobs, cancelledJobs, reviews, proposalsWithRequest, reports] = await Promise.all([
             Service.countDocuments({ workerId: id, status: 'COMPLETED' }),
             Service.countDocuments({ workerId: id, status: 'CANCELLED' }),
             Review.find({ revieweredId: id }).select('Rating'),
             Proposal.find({ workerId: id })
                 .populate({ path: 'serviceRequestId', select: 'createdAt' }),
+            Report.countDocuments({ reporteredId: id }),
         ]);
 
         const total = completedJobs + cancelledJobs;
         const completionRate = total > 0 ? completedJobs / total : null;
+        const reportRate = total > 0 ? reports / total : null;
 
         let avgResponseTimeHours = null;
         const responseTimes = proposalsWithRequest
@@ -417,6 +420,8 @@ export const getTrustStats = async (req, res) => {
                 completedJobs,
                 cancelledJobs,
                 completionRate,
+                reports,
+                reportRate,
                 avgResponseTimeHours,
                 memberSince: user.createdAt,
                 repeatClientsCount,
@@ -428,6 +433,63 @@ export const getTrustStats = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error al obtener estadísticas de confianza',
+            error: error.message
+        });
+    }
+};
+
+export const getClientTrustStats = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const user = await User.findById(id).select('createdAt');
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+        }
+
+        const [completedServices, cancelledServices, reviews, reports] = await Promise.all([
+            Service.countDocuments({ clientId: id, status: 'COMPLETED' }),
+            Service.countDocuments({ clientId: id, status: 'CANCELLED' }),
+            Review.find({ revieweredId: id }).select('Rating'),
+            Report.countDocuments({ reporteredId: id }),
+        ]);
+
+        const total = completedServices + cancelledServices;
+        const completionRate = total > 0 ? completedServices / total : null;
+
+        const ratingCount = reviews.length;
+        const ratingAverage = ratingCount > 0
+            ? Math.round(reviews.reduce((sum, r) => sum + r.Rating, 0) / ratingCount * 10) / 10
+            : null;
+
+        const services = await Service.find({ clientId: id }).select('workerId');
+        const workerCounts = {};
+        services.forEach((s) => {
+            const wid = s.workerId?.toString();
+            if (wid) workerCounts[wid] = (workerCounts[wid] || 0) + 1;
+        });
+        const repeatWorkersCount = Object.values(workerCounts).filter((c) => c > 1).length;
+
+        const reportRate = total > 0 ? reports / total : null;
+
+        res.status(200).json({
+            success: true,
+            data: {
+                completedServices,
+                cancelledServices,
+                completionRate,
+                reports,
+                reportRate,
+                memberSince: user.createdAt,
+                repeatWorkersCount,
+                ratingAverage,
+                ratingCount,
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error al obtener estadísticas de confianza del cliente',
             error: error.message
         });
     }

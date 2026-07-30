@@ -86,6 +86,50 @@ export const cancelProposal = async (req, res) => {
     }
 };
 
+export const getProposalById = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).send({ success: false, message: 'ID de propuesta inválido' });
+        }
+
+        const proposal = await Proposal.findById(id)
+            .populate('workerId', 'firstName lastName profilePhoto ratingAverage phone')
+            .populate({
+                path: 'serviceRequestId',
+                select: 'title description serviceImage address latitude longitude budgetMin budgetMax categoryId status createdAt clientId',
+                populate: [
+                    { path: 'categoryId', select: 'name' },
+                    { path: 'clientId', select: 'firstName lastName profilePhoto email phone' }
+                ]
+            });
+
+        if (!proposal) {
+            return res.status(404).send({ success: false, message: 'Propuesta no encontrada' });
+        }
+
+        const serviceRequest = proposal.serviceRequestId;
+        if (typeof serviceRequest !== 'string' && serviceRequest?.clientId) {
+            const clientId = typeof serviceRequest.clientId === 'string'
+                ? serviceRequest.clientId
+                : serviceRequest.clientId._id?.toString();
+
+            const workerId = typeof proposal.workerId === 'string'
+                ? proposal.workerId
+                : proposal.workerId?._id?.toString();
+
+            if (req.user._id.toString() !== clientId && req.user._id.toString() !== workerId) {
+                return res.status(403).send({ success: false, message: 'No tienes permiso para ver esta propuesta' });
+            }
+        }
+
+        return res.send({ success: true, proposal });
+    } catch (err) {
+        return res.status(500).send({ success: false, message: 'Error al obtener la propuesta', err: err.message });
+    }
+};
+
 export const getProposalsByWorker = async (req, res) => {
     try {
         const { workerId } = req.params;
