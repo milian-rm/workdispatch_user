@@ -41,14 +41,11 @@ export const validateCreateUser = [
         .optional(),
 
     body('latitude')
-        .optional(),
-
-    body('longitude')
-        .optional()
+        .optional({ nullable: true, checkFalsy: true })
         .isFloat().withMessage('Latitud debe ser numérica'),
 
     body('longitude')
-        .optional()
+        .optional({ nullable: true, checkFalsy: true })
         .isFloat().withMessage('Longitud debe ser numérica'),
 
     body('address')
@@ -98,10 +95,12 @@ export const validateUpdateUser = [
         .optional(),
 
     body('latitude')
-        .optional(),
+        .optional({ nullable: true, checkFalsy: true })
+        .isFloat().withMessage('Latitud debe ser numérica'),
 
     body('longitude')
-        .optional(),
+        .optional({ nullable: true, checkFalsy: true })
+        .isFloat().withMessage('Longitud debe ser numérica'),
 
     body('address')
         .optional(),
