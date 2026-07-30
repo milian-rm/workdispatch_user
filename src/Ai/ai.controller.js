@@ -15,8 +15,8 @@ ${budgetMin || budgetMax ? `Presupuesto de referencia del cliente: Q${budgetMin 
 
 Respondé SOLO con un JSON, sin texto adicional ni backticks, con esta forma:
 {
-  "budgetMin": <número, quetzales>,
-  "budgetMax": <número, quetzales>,
+  "budgetMin": <número entero >= 10, en quetzales — mínimo Q10>,
+  "budgetMax": <número entero >= 10, en quetzales, mayor o igual a budgetMin — mínimo Q10>,
   "estimatedTime": "<texto corto, ej. '2 a 3 días'>",
   "suggestedMessage": "<mensaje corto en primera persona ofreciendo el trabajo, SIN mencionar montos ni cifras de dinero — el precio ya se muestra por separado>"
 }
@@ -53,6 +53,13 @@ export const getEstimate = async (req, res) => {
         const rawText = groqResponse.data?.choices?.[0]?.message?.content || '';
         const cleaned = rawText.replace(/```json|```/g, '').trim();
         const parsed = JSON.parse(cleaned);
+
+        if (!parsed.budgetMin || !parsed.budgetMax || parsed.budgetMin < 10 || parsed.budgetMax < 10) {
+            return res.status(502).json({
+                success: false,
+                message: 'La IA no pudo generar un estimado confiable para este trabajo. Intentá reformular la descripción o ingresá el presupuesto manualmente.'
+            });
+        }
 
         res.status(200).json({ success: true, data: parsed });
     } catch (error) {

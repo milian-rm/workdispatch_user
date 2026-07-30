@@ -28,8 +28,7 @@ const getAllowedConferenceTypes = async (calendar) => {
     }
 };
 
-const generateGoogleMeet = async ({ proposal, client, worker, serviceRequest, startTime }) => {
-    const startDate = startTime || new Date();
+const generateGoogleMeet = async ({ meetingId, client, worker, serviceRequest, startTime }) => {    const startDate = startTime || new Date();
     const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
 
     const auth = getAuthClient();
@@ -66,7 +65,7 @@ const generateGoogleMeet = async ({ proposal, client, worker, serviceRequest, st
             ...event,
             conferenceData: {
                 createRequest: {
-                    requestId: `${proposal._id}-${Date.now()}-${conferenceType}`,
+                    requestId: `${meetingId}-${Date.now()}-${conferenceType}`,
                     conferenceSolutionKey: { type: conferenceType }
                 }
             }
@@ -344,14 +343,14 @@ export const confirmMeeting = async (req, res) => {
 
         const bothConfirmed = meeting.confirmedByClient && meeting.confirmedByWorker;
         if (bothConfirmed) {
-            const proposal = await Proposal.findById(meeting.proposalId);
-            const serviceRequest = await ServiceRequest.findById(meeting.serviceRequestId);
+            const proposal = meeting.proposalId ? await Proposal.findById(meeting.proposalId) : null;            const serviceRequest = await ServiceRequest.findById(meeting.serviceRequestId);
             const client = await User.findById(meeting.clientId).select('email firstName lastName');
             const worker = await User.findById(meeting.workerId).select('email firstName lastName');
 
-            if (proposal && serviceRequest && client && worker) {
+            if (serviceRequest && client && worker) {
                 try {
                     const googleData = await generateGoogleMeet({
+                        meetingId: meeting._id,
                         proposal,
                         client,
                         worker,
@@ -363,20 +362,26 @@ export const confirmMeeting = async (req, res) => {
                     meeting.endTime = googleData.endDate;
                 } catch (googleError) {
                     console.error('Error al generar Google Meet:', googleError.message);
+                    console.error('Stack:', googleError.stack);
                 }
+            }
+
+            if (!meeting.meetLink) {
+                console.error('Falling back to Jitsi Meet link.');
+                meeting.meetLink = `https://meet.jit.si/WorkDispatch_${meeting._id}`;
             }
 
             meeting.status = 'CONFIRMED';
 
             await createAutomaticNotification(
                 meeting.clientId,
-                '¡Entrevista confirmada! Ya puedes ver el enlace de Google Meet.',
+                '¡Entrevista confirmada! Ya puedes ver el enlace de videollamada.',
                 'MEETING_CONFIRMED',
                 meeting._id
             );
             await createAutomaticNotification(
                 meeting.workerId,
-                '¡Entrevista confirmada! Ya puedes ver el enlace de Google Meet.',
+                '¡Entrevista confirmada! Ya puedes ver el enlace de videollamada.',
                 'MEETING_CONFIRMED',
                 meeting._id
             );
@@ -403,7 +408,7 @@ export const confirmMeeting = async (req, res) => {
         res.status(200).json({
             success: true,
             message: bothConfirmed
-                ? 'Ambos confirmaron. La entrevista ha sido agendada con Google Meet.'
+                ? 'Ambos confirmaron. La entrevista ha sido agendada.'
                 : 'Asistencia confirmada. Esperando la confirmación de la otra parte.',
             data: meeting
         });
