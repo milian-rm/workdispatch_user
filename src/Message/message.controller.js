@@ -2,6 +2,7 @@ import Message from './message.model.js';
 import Conversation from '../Conversation/conversation.model.js';
 import User from '../Users/user.model.js';
 import { createAutomaticNotification } from '../helpers/notification.helper.js';
+import { getIO } from '../../configs/socket.js';
 
 export const sendMessage = async (req, res) => {
     try {
@@ -48,6 +49,15 @@ export const sendMessage = async (req, res) => {
         conversation.lastMessageAt = new Date();
 
         await conversation.save();
+        
+        try {
+            getIO().to(receiverId.toString()).emit('newMessage', {
+                message: newMessage,
+                conversationId
+            });
+        } catch (socketError) {
+            console.log('No se pudo emitir el mensaje por socket:', socketError.message);
+        }
 
         // Crear notificación automática
         const sender = await User.findById(senderId).select('firstName lastName');

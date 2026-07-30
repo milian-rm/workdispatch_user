@@ -3,6 +3,7 @@ import 'dotenv/config';
 
 // Importaciones
 import express from 'express';
+import http from 'http';
 import cors from 'cors';
 import morgan from 'morgan';
 import helmet from 'helmet';
@@ -11,6 +12,7 @@ import { dbConnection } from './db.js';
 import { helmetConfiguration } from './helmet-configuration.js';
 import { requestLimit } from '../middlewares/request-limit.js';
 import { errorHandler } from '../middlewares/handle-errors.js';
+import { initSocket } from './socket.js';
 
 // Importaciones de Rutas
 const BASE_URL = '/workDispatch/v1';
@@ -30,6 +32,7 @@ import conversationRoutes from '../src/Conversation/conversation.routes.js'
 import messageRoutes from '../src/Message/message.routes.js';
 import aiRoutes from '../src/Ai/ai.routes.js';
 import FavoriteRoutes from '../src/Favorite/Favorite.routes.js';
+import meetingRoutes from '../src/Meeting/meeting.routes.js';
 
 const middleware = (app) => {
     app.use(helmet(helmetConfiguration));
@@ -61,6 +64,7 @@ const routes = (app) => {
     app.use(`${BASE_URL}/messages`, messageRoutes);    
     app.use(`${BASE_URL}/ai`, aiRoutes);
     app.use(`${BASE_URL}/Favorite`, FavoriteRoutes);
+    app.use(`${BASE_URL}/meetings`, meetingRoutes);
 
 }
 
@@ -72,13 +76,16 @@ const initServer = async () => {
         await dbConnection();
         middleware(app);
 
-        // Las rutas deben cargarse ANTES que el manejador de errores
         routes(app);
         app.use(errorHandler);
 
-        app.listen(PORT, () => {
+        const httpServer = http.createServer(app);
+        initSocket(httpServer);
+
+        httpServer.listen(PORT, () => {
             console.log(`Servidor corriendo en el puerto ${PORT}`);
             console.log(`Base URL: http://localhost:${PORT}${BASE_URL}`);
+            console.log(`Socket.io activo en el mismo puerto`);
         });
 
     } catch (error) {
