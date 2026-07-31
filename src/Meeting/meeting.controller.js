@@ -640,7 +640,9 @@ export const workerRequestMeeting = async (req, res) => {
             workerId,
             serviceRequestId,
             status: 'PENDING',
-            requestedBy: 'WORKER'
+            requestedBy: 'WORKER',
+            confirmedByWorker: !!startTime,
+            lastProposedBy: startTime ? 'WORKER' : null
         };
         if (startTime) {
             meetingData.startTime = new Date(startTime);
